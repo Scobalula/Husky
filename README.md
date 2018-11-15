@@ -10,6 +10,8 @@ Husky is a BSP Extractor for Call of Duty. It can rip the raw vertex/face data t
 * Call of Duty: Ghosts
 * Call of Duty: Modern Warfare Remastered
 
+**Call of Duty: Black Ops 3 will never be supported, for obvious reasons**
+
 ### Downloading/Using Husky
 
 To download Husky, go to the [Releases](https://github.com/Scobalula/Husky/releases) and download the latest build.
