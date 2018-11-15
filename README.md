@@ -22,6 +22,8 @@ Husky is licensed under the GPL license and it and its source code is free to us
 
 All BSP data extracted using Husky is property of the developers, etc. Husky simply parses the data out, what you do with the data is your reponsibility.
 
+Some of the exported models can get pretty big. While all have loaded in Maya with no issue, make sure to have available resources available to load and view them.
+
 **Husky is currently in alpha, and with that in mind, bugs, errors, you know, the bad stuff.**
 
 ## Credits
