@@ -23,7 +23,9 @@
 // File: ByteUtil.cs
 // Author: Philip/Scobalula
 // Description: Utilities for working with Bytes and Bits
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PhilLibX
@@ -58,6 +60,26 @@ namespace PhilLibX
         public static byte GetBit(long input, int bit)
         {
             return (byte)((input >> bit) & 1);
+        }
+
+        public static T BytesToStruct<T>(byte[] data, int startIndex)
+        {
+            // Size of Struct
+            int size = Marshal.SizeOf<T>();
+            // Create new byte array
+            byte[] buffer = new byte[size];
+            // Copy it
+            Buffer.BlockCopy(data, startIndex, buffer, 0, size);
+            // Return result
+            return BytesToStruct<T>(buffer);
+        }
+
+        public static T BytesToStruct<T>(byte[] data)
+        {
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            T theStructure = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
+            handle.Free();
+            return theStructure;
         }
     }
 }

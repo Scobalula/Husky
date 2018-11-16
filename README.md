@@ -16,6 +16,14 @@ To download Husky, go to the [Releases](https://github.com/Scobalula/Husky/relea
 
 To use Husky, simply run the game, load the map you want to extract, and run Husky.
 
+Once the map is exported, you will have 3 files for it:
+
+* **mapname**.obj - Main 3D Obj File
+* **mapname**.mtl - Material Info
+* **mapname**.txt - A search string for Wraith/Greyhound (only contains color maps)
+
+If you wish to use textures (be warned they can result in high RAM usage) then make sure to have the _images folder in the same location as the obj/mtl file and export PNGs (do not ask for other formats, it's staying as PNG, do a find/replace if you want to use other formats).
+
 ### License/Disclaimers
 
 Husky is licensed under the GPL license and it and its source code is free to use and modify under the. Husky comes with NO warranty, any damages caused are solely the responsibility of the user. See the LICENSE file for more information.
@@ -25,6 +33,20 @@ All BSP data extracted using Husky is property of the developers, etc. Husky sim
 Some of the exported models can get pretty big. While all have loaded in Maya with no issue, make sure to have available resources available to load and view them.
 
 **Husky is currently in alpha, and with that in mind, bugs, errors, you know, the bad stuff.**
+
+## FAQ
+
+* Q: Husky says it cannot find my game?
+
+* A: Check the above list for a supported game, when searching for a supported game, Husky loops over all processes and stops at the first match, if it's not finding your game and it is supported, your exe is not the same name as what Husky expects or something is blocking .NET from returning its process.
+
+* Q: Husky says my game is not supported?
+
+* A: I verify the addresses on legitimate up to date copies of the supported games in the English locale. If you're using a modified executable (Pirated, etc.) I will not support it.
+
+* Q: The exported OBJ is corrupt when imported?
+
+* A: Tons of BSPs across all supported games have been verified, if you have find a legitimate instance of a corrupt export, please open an issue with the name of the map, etc. as much info as you can.
 
 ## Credits
 

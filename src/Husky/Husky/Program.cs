@@ -112,6 +112,7 @@ namespace Husky
             }
             catch(Exception e)
             {
+                Console.WriteLine(e);
                 Printer.WriteException(e, "ERROR", "An unhandled exception has occured:");
             }
         }

@@ -53,7 +53,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Games\GameStructures.cs" />
+    <Compile Include="FileFormats\WavefrontOBJ.cs" />
+    <Compile Include="GameStructures\Shared.cs" />
     <Compile Include="Games\Ghosts.cs" />
     <Compile Include="Games\ModernWarfare3.cs" />
     <Compile Include="Games\ModernWarfare2.cs" />
@@ -62,7 +63,11 @@
     <Compile Include="Games\WorldAtWar.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\Color.cs" />
     <Compile Include="Utility\Rotation.cs" />
+    <Compile Include="Utility\Vectors.cs" />
+    <Compile Include="Utility\Vertex.cs" />
+    <Compile Include="Utility\VertexNormal.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -72,10 +77,6 @@
     <ProjectReference Include="..\PhilLibX\PhilLibX.csproj">
       <Project>{8f5c1ba4-88c1-4177-b91b-dd093dc849b9}</Project>
       <Name>PhilLibX</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SELib\SELib.csproj">
-      <Project>{e03da150-718d-4ea9-afca-d3e17a7df3e8}</Project>
-      <Name>SELib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

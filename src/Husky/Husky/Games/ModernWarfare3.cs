@@ -19,9 +19,9 @@ using PhilLibX;
 using PhilLibX.IO;
 using System;
 using System.IO;
-using SELib;
-using SELib.Utilities;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace Husky
 {
@@ -30,6 +30,104 @@ namespace Husky
     /// </summary>
     class ModernWarfare3
     {
+        /// <summary>
+        /// MW3 GfxMap Asset (some pointers we skip over point to DirectX routines, etc. if that means anything to anyone)
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public unsafe struct GfxMap
+        {
+            /// <summary>
+            /// A pointer to the name of this GfxMap Asset
+            /// </summary>
+            public int NamePointer { get; set; }
+
+            /// <summary>
+            /// A pointer to the name of the map 
+            /// </summary>
+            public int MapNamePointer { get; set; }
+
+            /// <summary>
+            /// Unknown Bytes (Possibly counts for other data we don't care about)
+            /// </summary>
+            public fixed byte Padding[8];
+
+            /// <summary>
+            /// Number of Surfaces
+            /// </summary>
+            public int SurfaceCount { get; set; }
+
+            /// <summary>
+            /// Unknown Bytes (Possibly counts, pointers, etc. for other data we don't care about)
+            /// </summary>
+            public fixed byte Padding1[0x70];
+
+            /// <summary>
+            /// Number of Gfx Vertices (XYZ, etc.)
+            /// </summary>
+            public int GfxVertexCount { get; set; }
+
+            /// <summary>
+            /// Pointer to the Gfx Vertex Data
+            /// </summary>
+            public int GfxVerticesPointer { get; set; }
+
+            /// <summary>
+            /// Unknown Bytes (more BSP data we probably don't care for)
+            /// </summary>
+            public fixed byte Padding2[0x10];
+
+            /// <summary>
+            /// Number of Gfx Indices (for Faces)
+            /// </summary>
+            public int GfxIndicesCount { get; set; }
+
+            /// <summary>
+            /// Pointer to the Gfx Index Data
+            /// </summary>
+            public int GfxIndicesPointer { get; set; }
+
+            /// <summary>
+            /// Unknown Bytes (more BSP data we probably don't care for)
+            /// </summary>
+            public fixed byte Padding3[0x184];
+
+            /// <summary>
+            /// Pointer to the Gfx Index Data
+            /// </summary>
+            public int GfxSurfacesPointer { get; set; }
+        }
+
+        /// <summary>
+        /// Call of Duty: Modern Warfare 3 Material Asset
+        /// </summary>
+        public unsafe struct Material
+        {
+            /// <summary>
+            /// A pointer to the name of this material
+            /// </summary>
+            public int NamePointer { get; set; }
+
+            /// <summary>
+            /// Unknown Bytes (Flags, settings, etc.)
+            /// </summary>
+            public fixed byte UnknownBytes[0x4A];
+
+            /// <summary>
+            /// Number of Images this Material has
+            /// </summary>
+            public byte ImageCount { get; set; }
+
+            /// <summary>
+            /// Unknown Bytes (Flags, settings, etc.)
+            /// </summary>
+            public fixed byte UnknownBytes1[9];
+
+            /// <summary>
+            /// A pointer to this Material's Image table
+            /// </summary>
+            public int ImageTablePointer { get; set; }
+        }
+
         /// <summary>
         /// Reads BSP Data
         /// </summary>
@@ -41,7 +139,7 @@ namespace Husky
             if (reader.ReadNullTerminatedString(reader.ReadInt32(reader.ReadInt32(assetPoolsAddress + 0x10) + 4)) == "void")
             {
                 // Load BSP Pools (they only have a size of 1 so we have no free header)
-                var gfxMapAsset = reader.ReadStruct<GfxMapMW3>(reader.ReadInt32(assetPoolsAddress + 0x54));
+                var gfxMapAsset = reader.ReadStruct<GfxMap>(reader.ReadInt32(assetPoolsAddress + 0x54));
 
                 // Name
                 string gfxMapName = reader.ReadNullTerminatedString(gfxMapAsset.NamePointer);
@@ -88,51 +186,69 @@ namespace Husky
                     // Reset timer
                     stopWatch.Restart();
 
-                    // Write SEModel
+                    // Write OBJ
                     Printer.WriteLine("INFO", "Converting to OBJ....");
 
-                    // Create Dir
-                    Directory.CreateDirectory(Path.GetDirectoryName(gfxMapName));
+                    // Create new OBJ
+                    var obj = new WavefrontOBJ();
 
-                    // Create OBJ output
-                    using (StreamWriter writer = new StreamWriter(Path.ChangeExtension(gfxMapName, ".obj")))
+                    // Append Vertex Data
+                    foreach (var vertex in vertices)
                     {
-                        // Dump vertex data
-                        foreach (var vertex in vertices)
-                        {
-                            writer.WriteLine("v {0} {1} {2}", vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
-                            writer.WriteLine("vn {0} {1} {2}", vertex.VertexNormal.X, vertex.VertexNormal.Y, vertex.VertexNormal.Z);
-                            writer.WriteLine("vt {0} {1}", vertex.UVSets[0].X, vertex.UVSets[0].Y);
-                        }
+                        obj.Vertices.Add(vertex.Position);
+                        obj.Normals.Add(vertex.Normal);
+                        obj.UVs.Add(vertex.UV);
+                    }
 
-                        // Dump Surfaces
-                        foreach (var surface in surfaces)
-                        {
-                            // Get Material Name, purge any prefixes and Auto-Gen star characters
-                            var materialName = Path.GetFileNameWithoutExtension(reader.ReadNullTerminatedString(reader.ReadInt32(surface.MaterialPointer)).Replace("*", ""));
+                    // Image Names (for Search String)
+                    HashSet<string> imageNames = new HashSet<string>();
 
-                            // Write MTL and Group
-                            writer.WriteLine("g {0}", materialName);
-                            writer.WriteLine("usemtl {0}", materialName);
-                            // Add points
-                            for (ushort i = 0; i < surface.FaceCount; i++)
+                    // Append Faces
+                    foreach (var surface in surfaces)
+                    {
+                        // Create new Material
+                        var material = ReadMaterial(reader, surface.MaterialPointer);
+                        // Add to images
+                        imageNames.Add(material.DiffuseMap);
+                        // Add it
+                        obj.AddMaterial(material);
+                        // Add points
+                        for (ushort i = 0; i < surface.FaceCount; i++)
+                        {
+                            // Face Indices
+                            var faceIndex1 = indices[i * 3 + surface.FaceIndex] + surface.VertexIndex;
+                            var faceIndex2 = indices[i * 3 + surface.FaceIndex + 1] + surface.VertexIndex;
+                            var faceIndex3 = indices[i * 3 + surface.FaceIndex + 2] + surface.VertexIndex;
+
+                            // Validate unique points, and write to OBJ
+                            if (faceIndex1 != faceIndex2 && faceIndex1 != faceIndex3 && faceIndex2 != faceIndex3)
                             {
+                                // new Obj Face
+                                var objFace = new WavefrontOBJ.Face(material.Name);
 
+                                // Add points
+                                objFace.Vertices[0] = new WavefrontOBJ.Face.Vertex(faceIndex1, faceIndex1, faceIndex1);
+                                objFace.Vertices[2] = new WavefrontOBJ.Face.Vertex(faceIndex2, faceIndex2, faceIndex2);
+                                objFace.Vertices[1] = new WavefrontOBJ.Face.Vertex(faceIndex3, faceIndex3, faceIndex3);
 
-                                // Face Indices
-                                var faceIndex1 = indices[i * 3 + surface.FaceIndex] + surface.VertexIndex + 1;
-                                var faceIndex2 = indices[i * 3 + surface.FaceIndex + 1] + surface.VertexIndex + 1;
-                                var faceIndex3 = indices[i * 3 + surface.FaceIndex + 2] + surface.VertexIndex + 1;
-
-                                // Validate unique points, and write to OBJ
-                                if (faceIndex1 != faceIndex2 && faceIndex1 != faceIndex3 && faceIndex2 != faceIndex3)
-                                    writer.WriteLine("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}",
-                                        faceIndex1,
-                                        faceIndex3,
-                                        faceIndex2);
+                                // Add to OBJ
+                                obj.Faces.Add(objFace);
                             }
                         }
                     }
+
+                    // Save it
+                    obj.Save(Path.ChangeExtension(gfxMapName, ".obj"));
+
+                    // Build search strinmg
+                    string searchString = "";
+
+                    // Loop through images, and append each to the search string (for Wraith/Greyhound)
+                    foreach (string imageName in imageNames)
+                        searchString += String.Format("{0},", Path.GetFileNameWithoutExtension(imageName));
+
+                    // Dump it
+                    File.WriteAllText(Path.ChangeExtension(gfxMapName, ".txt"), searchString);
 
                     // Done
                     Printer.WriteLine("INFO", String.Format("Converted to OBJ in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
@@ -148,14 +264,14 @@ namespace Husky
         /// <summary>
         /// Reads Gfx Surfaces
         /// </summary>
-        public static GfxSurfaceMW3[] ReadGfxSufaces(ProcessReader reader, long address, int count)
+        public static ModernWarfare2.GfxSurface[] ReadGfxSufaces(ProcessReader reader, long address, int count)
         {
             // Preallocate short array
-            GfxSurfaceMW3[] surfaces = new GfxSurfaceMW3[count];
+            ModernWarfare2.GfxSurface[] surfaces = new ModernWarfare2.GfxSurface[count];
             // Loop number of indices we have
             for (int i = 0; i < count; i++)
                 // Add it
-                surfaces[i] = reader.ReadStruct<GfxSurfaceMW3>(address + i * 24);
+                surfaces[i] = reader.ReadStruct<ModernWarfare2.GfxSurface>(address + i * 24);
             // Done
             return surfaces;
         }
@@ -179,52 +295,57 @@ namespace Husky
         /// <summary>
         /// Reads Gfx Vertices
         /// </summary>
-        public static SEModelVertex[] ReadGfxVertices(ProcessReader reader, long address, int count)
+        public static Vertex[] ReadGfxVertices(ProcessReader reader, long address, int count)
         {
             // Preallocate vertex array
-            SEModelVertex[] vertices = new SEModelVertex[count];
+            Vertex[] vertices = new Vertex[count];
             // Read buffer
             var byteBuffer = reader.ReadBytes(address, count * 44);
             // Loop number of vertices we have
             for (int i = 0; i < count; i++)
             {
-                // Grab Offset
-                float x = BitConverter.ToSingle(byteBuffer, i * 44);
-                float y = BitConverter.ToSingle(byteBuffer, i * 44 + 4);
-                float z = BitConverter.ToSingle(byteBuffer, i * 44 + 8);
-
-                // Grab UV
-                float u = BitConverter.ToSingle(byteBuffer, i * 44 + 20);
-                float v = BitConverter.ToSingle(byteBuffer, i * 44 + 24);
-
-                // Grab Normal
-                int vertexNormal = BitConverter.ToInt32(byteBuffer, i * 44 + 36);
-
-                // Decode the scale of the vector
-                float DecodeScale = (float)((float)((vertexNormal & 0xFF000000) >> 24) - -192.0) / 32385.0f;
+                // Read Struct
+                var gfxVertex = ByteUtil.BytesToStruct<GfxVertex>(byteBuffer, i * 44);
 
                 // Create new SEModel Vertex
-                vertices[i] = new SEModelVertex()
+                vertices[i] = new Vertex()
                 {
                     // Set offset
                     Position = new Vector3(
-                        x,
-                        y,
-                        z),
+                        gfxVertex.X,
+                        gfxVertex.Y,
+                        gfxVertex.Z),
                     // Decode and set normal (from DTZxPorter - Wraith, same as XModels)
-                    VertexNormal = new Vector3(
-                        (float)((float)(vertexNormal & 0xFF) - 127.0) * DecodeScale,
-                        (float)((float)((vertexNormal & 0xFF00) >> 8) - 127.0) * DecodeScale,
-                        (float)((float)((vertexNormal & 0xFF0000) >> 16) - 127.0) * DecodeScale)
-
+                    Normal = VertexNormal.UnpackA(gfxVertex.Normal),
+                    // Set UV
+                    UV = new Vector2(gfxVertex.U, 1 - gfxVertex.V)
                 };
-
-                // Set UV
-                vertices[i].UVSets.Add(new Vector2(u, v));
             }
 
             // Done
             return vertices;
+        }
+
+        /// <summary>
+        /// Reads a material for the given surface and its associated images
+        /// </summary>
+        public static WavefrontOBJ.Material ReadMaterial(ProcessReader reader, long address)
+        {
+            // Read Material
+            var material = reader.ReadStruct<Material>(address);
+            // Create new OBJ Image
+            var objMaterial = new WavefrontOBJ.Material(Path.GetFileNameWithoutExtension(reader.ReadNullTerminatedString(reader.ReadInt32(address)).Replace("*", "")));
+            // Loop over images
+            for (byte i = 0; i < material.ImageCount; i++)
+            {
+                // Read Material Image
+                var materialImage = reader.ReadStruct<MaterialImage32B>(material.ImageTablePointer + i * Marshal.SizeOf<MaterialImage32B>());
+                // Check for color map for now
+                if (materialImage.SemanticHash == 0xA0AB1041)
+                    objMaterial.DiffuseMap = "_images\\\\" + reader.ReadNullTerminatedString(reader.ReadInt32(materialImage.ImagePointer + 0x1C)) + ".png";
+            }
+            // Done
+            return objMaterial;
         }
     }
 }
