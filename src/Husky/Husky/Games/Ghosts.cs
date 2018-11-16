@@ -22,6 +22,8 @@ using System.IO;
 using SELib;
 using SELib.Utilities;
 using System.Diagnostics;
+// ApexModder: 16/11/18 - Added to use List<> type
+using System.Collections.Generic;
 
 namespace Husky
 {
@@ -95,9 +97,18 @@ namespace Husky
                     // Create Dir
                     Directory.CreateDirectory(Path.GetDirectoryName(gfxMapName));
 
+                    // ApexModder: 16/11/18 - Store materials
+                    var materialNames = new List<String>();
+
+                    // ApexModder: 16/11/18 - Store obj path as its used more than once
+                    var mtlFilePath = Path.ChangeExtension(gfxMapName, ".mtl");
+
                     // Create OBJ output
                     using (StreamWriter writer = new StreamWriter(Path.ChangeExtension(gfxMapName, ".obj")))
                     {
+                        // ApexModder: 16/11/18 - Reference the .MTL file we generate below
+                        writer.WriteLine("mtllib {0}", Path.GetFileName(mtlFilePath)); // mtllib <mapname>.mtl
+
                         // Dump vertex data
                         foreach (var vertex in vertices)
                         {
@@ -111,6 +122,10 @@ namespace Husky
                         {
                             // Get Material Name, purge any prefixes and Auto-Gen star characters
                             var materialName = Path.GetFileNameWithoutExtension(reader.ReadNullTerminatedString(reader.ReadInt64(surface.MaterialPointer)).Replace("*", ""));
+
+                            // ApexModder: 16/11/18 - Store if not already in array
+                            if (!materialNames.Contains(materialName))
+                                materialNames.Add(materialName);
 
                             // Write MTL and Group
                             writer.WriteLine("g {0}", materialName);
@@ -130,6 +145,21 @@ namespace Husky
                                         faceIndex3,
                                         faceIndex2);
                             }
+                        }
+                    }
+
+                    // ApexModder: 16/11/18 - Write a .MTL file for the .OBJ file
+                    using (StreamWriter mtlWriter = new StreamWriter(mtlFilePath))
+                    {
+                        foreach (var materialName in materialNames)
+                        {
+                            mtlWriter.WriteLine("newmtl {0}", materialName);
+                            // ApexModder: 16/11/18 - flatwhite material
+                            mtlWriter.WriteLine("Ka 0.5000 0.5000 0.5000");
+                            mtlWriter.WriteLine("Kd 1.0000 1.0000 1.0000");
+                            mtlWriter.WriteLine("illum 1");
+                            // ApexModder: 16/11/18 - seperate each material def with blank line
+                            mtlWriter.WriteLine();
                         }
                     }
 
