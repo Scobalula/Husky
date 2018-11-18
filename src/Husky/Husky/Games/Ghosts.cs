@@ -89,12 +89,32 @@ namespace Husky
             /// <summary>
             /// Pointers, etc.
             /// </summary>
-            public fixed byte Padding3[0x838];
+            public fixed byte Padding3[0x770];
+
+            /// <summary>
+            /// Number of Static Models
+            /// </summary>
+            public int GfxStaticModelsCount { get; set; }
+
+            /// <summary>
+            /// Pointers, etc.
+            /// </summary>
+            public fixed byte Padding4[0xC4];
 
             /// <summary>
             /// Pointer to the Gfx Index Data
             /// </summary>
             public long GfxSurfacesPointer { get; set; }
+
+            /// <summary>
+            /// Pointer
+            /// </summary>
+            public long Padding5 { get; set; }
+
+            /// <summary>
+            /// Pointer to the Gfx Static Models
+            /// </summary>
+            public long GfxStaticModelsPointer { get; set; }
         }
 
         /// <summary>
@@ -201,6 +221,53 @@ namespace Husky
         }
 
         /// <summary>
+        /// Gfx Static Model
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public unsafe struct GfxStaticModel
+        {
+            /// <summary>
+            /// X Origin
+            /// </summary>
+            public float X { get; set; }
+
+            /// <summary>
+            /// Y Origin
+            /// </summary>
+            public float Y { get; set; }
+
+            /// <summary>
+            /// Z Origin
+            /// </summary>
+            public float Z { get; set; }
+
+            /// <summary>
+            /// 3x3 Rotation Matrix
+            /// </summary>
+            public fixed float Matrix[9];
+
+            /// <summary>
+            /// Model Scale 
+            /// </summary>
+            public float ModelScale { get; set; }
+
+            /// <summary>
+            /// Null Padding
+            /// </summary>
+            public int Padding { get; set; }
+
+            /// <summary>
+            /// Pointer to the XModel Asset
+            /// </summary>
+            public long ModelPointer { get; set; }
+
+            /// <summary>
+            /// Unknown Bytes
+            /// </summary>
+            public fixed byte UnknownBytes2[0x70];
+        }
+
+        /// <summary>
         /// Reads BSP Data
         /// </summary>
         public static void ExportBSPData(ProcessReader reader, long assetPoolsAddress, long assetSizesAddress)
@@ -225,12 +292,19 @@ namespace Husky
                 }
                 else
                 {
+                    // New IW Map
+                    var mapFile = new IWMap();
                     // Print Info
                     Printer.WriteLine("INFO", String.Format("Loaded Gfx Map     -   {0}", gfxMapName));
                     Printer.WriteLine("INFO", String.Format("Loaded Map         -   {0}", mapName));
                     Printer.WriteLine("INFO", String.Format("Vertex Count       -   {0}", gfxMapAsset.GfxVertexCount));
                     Printer.WriteLine("INFO", String.Format("Indices Count      -   {0}", gfxMapAsset.GfxIndicesCount));
                     Printer.WriteLine("INFO", String.Format("Surface Count      -   {0}", gfxMapAsset.SurfaceCount));
+                    Printer.WriteLine("INFO", String.Format("Model Count        -   {0}", gfxMapAsset.GfxStaticModelsCount));
+
+                    // Read entities and dump to map
+                    mapFile.Entities.AddRange(ReadStaticModels(reader, gfxMapAsset.GfxStaticModelsPointer, gfxMapAsset.GfxStaticModelsCount));
+                    mapFile.DumpToMap(Path.ChangeExtension(gfxMapName, ".map"));
 
                     // Stop watch
                     var stopWatch = Stopwatch.StartNew();
@@ -322,6 +396,10 @@ namespace Husky
 
                     // Dump it
                     File.WriteAllText(Path.ChangeExtension(gfxMapName, ".txt"), searchString);
+
+                    // Read entities and dump to map
+                    mapFile.Entities.AddRange(ReadStaticModels(reader, gfxMapAsset.GfxStaticModelsPointer, gfxMapAsset.GfxStaticModelsCount));
+                    mapFile.DumpToMap(Path.ChangeExtension(gfxMapName, ".map"));
 
                     // Done
                     Printer.WriteLine("INFO", String.Format("Converted to OBJ in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
@@ -421,6 +499,45 @@ namespace Husky
             }
             // Done
             return objMaterial;
+        }
+
+        /// <summary>
+        /// Reads Static Models
+        /// </summary>
+        public unsafe static List<IWMap.Entity> ReadStaticModels(ProcessReader reader, long address, int count)
+        {
+            // Resulting Entities
+            List<IWMap.Entity> entities = new List<IWMap.Entity>(count);
+            // Read buffer
+            var byteBuffer = reader.ReadBytes(address, count * Marshal.SizeOf<GfxStaticModel>());
+            // Loop number of models we have
+            for (int i = 0; i < count; i++)
+            {
+                // Read Struct
+                var staticModel = ByteUtil.BytesToStruct<GfxStaticModel>(byteBuffer, i * Marshal.SizeOf<GfxStaticModel>());
+                // Model Name
+                var modelName = reader.ReadNullTerminatedString(reader.ReadInt64(staticModel.ModelPointer));
+                // New Matrix
+                var matrix = new Rotation.Matrix();
+                // Copy X Values
+                matrix.Values[0] = staticModel.Matrix[0];
+                matrix.Values[1] = staticModel.Matrix[1];
+                matrix.Values[2] = staticModel.Matrix[2];
+                // Copy Y Values
+                matrix.Values[4] = staticModel.Matrix[3];
+                matrix.Values[5] = staticModel.Matrix[4];
+                matrix.Values[6] = staticModel.Matrix[5];
+                // Copy Z Values
+                matrix.Values[8] = staticModel.Matrix[6];
+                matrix.Values[9] = staticModel.Matrix[7];
+                matrix.Values[10] = staticModel.Matrix[8];
+                // Convert to Euler
+                var euler = matrix.ToEuler();
+                // Add it
+                entities.Add(IWMap.Entity.CreateMiscModel(modelName, new Vector3(staticModel.X, staticModel.Y, staticModel.Z), Rotation.ToDegrees(euler), staticModel.ModelScale));
+            }
+            // Done
+            return entities;
         }
     }
 }

@@ -6,7 +6,7 @@
     class VertexNormal
     {
         /// <summary>
-        /// Unpacks a Vertex Normal from: WaW, MW2, MW3
+        /// Unpacks a Vertex Normal from: WaW, MW2, MW3, Bo1
         /// </summary>
         /// <param name="packedNormal">Packed 4 byte Vertex Normal</param>
         /// <returns>Resulting Vertex Normal</returns>

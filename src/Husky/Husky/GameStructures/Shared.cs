@@ -124,53 +124,6 @@ namespace Husky
     }
 
     /// <summary>
-    /// Gfx Static Model
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct GfxStaticModel
-    {
-        /// <summary>
-        /// X Origin
-        /// </summary>
-        public float X { get; set; }
-
-        /// <summary>
-        /// Y Origin
-        /// </summary>
-        public float Y { get; set; }
-
-        /// <summary>
-        /// Z Origin
-        /// </summary>
-        public float Z { get; set; }
-
-        /// <summary>
-        /// Rotation (TODO: Look into it)
-        /// </summary>
-        public fixed byte UnknownBytes1[36];
-
-        /// <summary>
-        /// Model Scale 
-        /// </summary>
-        public float ModelScale { get; set; }
-
-        /// <summary>
-        /// Null Padding
-        /// </summary>
-        public int Padding { get; set; }
-
-        /// <summary>
-        /// Pointer to the XModel Asset
-        /// </summary>
-        public long ModelPointer { get; set; }
-
-        /// <summary>
-        /// Unknown Bytes
-        /// </summary>
-        public fixed byte UnknownBytes2[0x10];
-    }
-
-    /// <summary>
     /// Material Image for: WaW
     /// </summary>
     public unsafe struct MaterialImage32A

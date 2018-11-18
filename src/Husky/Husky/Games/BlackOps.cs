@@ -26,12 +26,12 @@ using System.Collections.Generic;
 namespace Husky
 {
     /// <summary>
-    /// AW Logic
+    /// Bo1 Logic
     /// </summary>
-    public class AdvancedWarfare
+    class BlackOps
     {
         /// <summary>
-        /// AW GfxMap Asset (some pointers we skip over point to DirectX routines, etc. if that means anything to anyone)
+        /// Bo1 GfxMap Asset (some pointers we skip over point to DirectX routines, etc. if that means anything to anyone)
         /// </summary>
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public unsafe struct GfxMap
@@ -39,17 +39,17 @@ namespace Husky
             /// <summary>
             /// A pointer to the name of this GfxMap Asset
             /// </summary>
-            public long NamePointer { get; set; }
+            public int NamePointer { get; set; }
 
             /// <summary>
             /// A pointer to the name of the map 
             /// </summary>
-            public long MapNamePointer { get; set; }
+            public int MapNamePointer { get; set; }
 
             /// <summary>
             /// Unknown Bytes (Possibly counts for other data we don't care about)
             /// </summary>
-            public fixed byte Padding[0xC];
+            public fixed byte Padding[8];
 
             /// <summary>
             /// Number of Surfaces
@@ -59,62 +59,42 @@ namespace Husky
             /// <summary>
             /// Unknown Bytes (Possibly counts, pointers, etc. for other data we don't care about)
             /// </summary>
-            public fixed byte Padding1[0x110];
+            public fixed byte Padding1[0x1E0];
 
             /// <summary>
             /// Number of Gfx Vertices (XYZ, etc.)
             /// </summary>
-            public long GfxVertexCount { get; set; }
+            public int GfxVertexCount { get; set; }
 
             /// <summary>
             /// Pointer to the Gfx Vertex Data
             /// </summary>
-            public long GfxVerticesPointer { get; set; }
+            public int GfxVerticesPointer { get; set; }
 
             /// <summary>
             /// Unknown Bytes (more BSP data we probably don't care for)
             /// </summary>
-            public fixed byte Padding2[0x20];
+            public fixed byte Padding2[0x14];
 
             /// <summary>
             /// Number of Gfx Indices (for Faces)
             /// </summary>
-            public long GfxIndicesCount { get; set; }
+            public int GfxIndicesCount { get; set; }
 
             /// <summary>
             /// Pointer to the Gfx Index Data
             /// </summary>
-            public long GfxIndicesPointer { get; set; }
+            public int GfxIndicesPointer { get; set; }
 
             /// <summary>
-            /// Points, etc.
+            /// Unknown Bytes (more BSP data we probably don't care for)
             /// </summary>
-            public fixed byte Padding3[0x5A0];
-
-            /// <summary>
-            /// Number of Static Models
-            /// </summary>
-            public int GfxStaticModelsCount { get; set; }
-
-            /// <summary>
-            /// Pointers, etc.
-            /// </summary>
-            public fixed byte Padding4[0x28C];
+            public fixed byte Padding3[0x184];
 
             /// <summary>
             /// Pointer to the Gfx Index Data
             /// </summary>
-            public long GfxSurfacesPointer { get; set; }
-
-            /// <summary>
-            /// Pointer
-            /// </summary>
-            public long Padding5 { get; set; }
-
-            /// <summary>
-            /// Pointer to the Gfx Static Models
-            /// </summary>
-            public long GfxStaticModelsPointer { get; set; }
+            public int GfxSurfacesPointer { get; set; }
         }
 
         /// <summary>
@@ -124,19 +104,19 @@ namespace Husky
         public unsafe struct GfxSurface
         {
             /// <summary>
-            /// Unknown Int (I know which pointer in the GfxMap it correlates it, but doesn't seem to interest us)
+            /// Unknown Bytes
             /// </summary>
-            public int UnknownBaseIndex { get; set; }
+            public fixed byte Padding[0xC];
+
+            /// <summary>
+            /// Unknown Bytes
+            /// </summary>
+            public fixed byte Padding1[0x10];
 
             /// <summary>
             /// Base Vertex Index (this is what allows the GfxMap to have 65k+ verts with only 2 byte indices)
             /// </summary>
             public int VertexIndex { get; set; }
-
-            /// <summary>
-            /// Unknown Bytes
-            /// </summary>
-            public int Padding1 { get; set; }
 
             /// <summary>
             /// Number of Vertices this surface has
@@ -154,35 +134,35 @@ namespace Husky
             public int FaceIndex { get; set; }
 
             /// <summary>
-            /// Unknown Bytes
+            /// Always 0xFFFFFFFF? 
             /// </summary>
-            public int Padding2 { get; set; }
+            public long Padding2 { get; set; }
 
             /// <summary>
             /// Pointer to the Material Asset of this Surface
             /// </summary>
-            public long MaterialPointer { get; set; }
+            public int MaterialPointer { get; set; }
 
             /// <summary>
             /// Unknown Bytes
             /// </summary>
-            public fixed byte Padding3[8];
+            public fixed byte Padding3[0x1C];
         }
 
         /// <summary>
-        /// Material Asset Info
+        /// Call of Duty: Black Ops Material Asset
         /// </summary>
         public unsafe struct Material
         {
             /// <summary>
             /// A pointer to the name of this material
             /// </summary>
-            public long NamePointer { get; set; }
+            public int NamePointer { get; set; }
 
             /// <summary>
             /// Unknown Bytes (Flags, settings, etc.)
             /// </summary>
-            public fixed byte UnknownBytes[0xDC];
+            public fixed byte UnknownBytes[0xA6];
 
             /// <summary>
             /// Number of Images this Material has
@@ -192,79 +172,12 @@ namespace Husky
             /// <summary>
             /// Unknown Bytes (Flags, settings, etc.)
             /// </summary>
-            public fixed byte UnknownBytes1[0xB];
-
-            /// <summary>
-            /// A pointer to the Tech Set this Material uses
-            /// </summary>
-            public long TechniqueSetPointer { get; set; }
+            public fixed byte UnknownBytes1[9];
 
             /// <summary>
             /// A pointer to this Material's Image table
             /// </summary>
-            public long ImageTablePointer { get; set; }
-
-            /// <summary>
-            /// Null Bytes
-            /// </summary>
-            public long Padding { get; set; }
-
-            /// <summary>
-            /// UnknownPointer (Probably settings that changed based off TechSet)
-            /// </summary>
-            public long UnknownPointer { get; set; }
-
-            /// <summary>
-            /// Unknown Bytes (Flags, settings, etc.)
-            /// </summary>
-            public fixed byte UnknownBytes2[0xD0];
-        }
-
-        /// <summary>
-        /// Gfx Static Model
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public unsafe struct GfxStaticModel
-        {
-            /// <summary>
-            /// X Origin
-            /// </summary>
-            public float X { get; set; }
-
-            /// <summary>
-            /// Y Origin
-            /// </summary>
-            public float Y { get; set; }
-
-            /// <summary>
-            /// Z Origin
-            /// </summary>
-            public float Z { get; set; }
-
-            /// <summary>
-            /// 3x3 Rotation Matrix
-            /// </summary>
-            public fixed float Matrix[9];
-
-            /// <summary>
-            /// Model Scale 
-            /// </summary>
-            public float ModelScale { get; set; }
-
-            /// <summary>
-            /// Null Padding
-            /// </summary>
-            public int Padding { get; set; }
-
-            /// <summary>
-            /// Pointer to the XModel Asset
-            /// </summary>
-            public long ModelPointer { get; set; }
-
-            /// <summary>
-            /// Unknown Bytes
-            /// </summary>
-            public fixed byte UnknownBytes2[0x10];
+            public int ImageTablePointer { get; set; }
         }
 
         /// <summary>
@@ -273,13 +186,16 @@ namespace Husky
         public static void ExportBSPData(ProcessReader reader, long assetPoolsAddress, long assetSizesAddress)
         {
             // Found her
-            Printer.WriteLine("INFO", "Found supported game: Call of Duty: Advanced Warfare");
+            Printer.WriteLine("INFO", "Found supported game: Call of Duty: Black Ops");
+
+            // Get XModel Name 
+            var firstXModelName = reader.ReadNullTerminatedString(reader.ReadInt32(reader.ReadInt32(assetPoolsAddress + 0x14) + 4));
 
             // Validate by XModel Name
-            if (reader.ReadNullTerminatedString(reader.ReadInt64(reader.ReadInt64(assetPoolsAddress + 0x38) + 8)) == "fx")
+            if (firstXModelName == "void" || firstXModelName == "defaultactor" || firstXModelName == "defaultweapon")
             {
-                // Load BSP Pools (they only have a size of 1 so we don't care about reading more than 1)
-                var gfxMapAsset = reader.ReadStruct<GfxMap>(reader.ReadInt64(assetPoolsAddress + 0xF8));
+                // Load BSP Pools (they only have a size of 1 so we have no free header)
+                var gfxMapAsset = reader.ReadStruct<GfxMap>(reader.ReadInt32(assetPoolsAddress + 0x44));
 
                 // Name
                 string gfxMapName = reader.ReadNullTerminatedString(gfxMapAsset.NamePointer);
@@ -292,15 +208,12 @@ namespace Husky
                 }
                 else
                 {
-                    // New IW Map
-                    var mapFile = new IWMap();
                     // Print Info
                     Printer.WriteLine("INFO", String.Format("Loaded Gfx Map     -   {0}", gfxMapName));
                     Printer.WriteLine("INFO", String.Format("Loaded Map         -   {0}", mapName));
                     Printer.WriteLine("INFO", String.Format("Vertex Count       -   {0}", gfxMapAsset.GfxVertexCount));
                     Printer.WriteLine("INFO", String.Format("Indices Count      -   {0}", gfxMapAsset.GfxIndicesCount));
                     Printer.WriteLine("INFO", String.Format("Surface Count      -   {0}", gfxMapAsset.SurfaceCount));
-                    Printer.WriteLine("INFO", String.Format("Model Count        -   {0}", gfxMapAsset.GfxStaticModelsCount));
 
                     // Stop watch
                     var stopWatch = Stopwatch.StartNew();
@@ -387,15 +300,11 @@ namespace Husky
                     string searchString = "";
 
                     // Loop through images, and append each to the search string (for Wraith/Greyhound)
-                    foreach(string imageName in imageNames)
+                    foreach (string imageName in imageNames)
                         searchString += String.Format("{0},", Path.GetFileNameWithoutExtension(imageName));
 
                     // Dump it
                     File.WriteAllText(Path.ChangeExtension(gfxMapName, ".txt"), searchString);
-
-                    // Read entities and dump to map
-                    mapFile.Entities.AddRange(ReadStaticModels(reader, gfxMapAsset.GfxStaticModelsPointer, gfxMapAsset.GfxStaticModelsCount));
-                    mapFile.DumpToMap(Path.ChangeExtension(gfxMapName, ".map"));
 
                     // Done
                     Printer.WriteLine("INFO", String.Format("Converted to OBJ in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
@@ -404,7 +313,7 @@ namespace Husky
             }
             else
             {
-                Printer.WriteLine("ERROR", "Call of Duty: Advanced Warfare is supported, but this EXE is not.", ConsoleColor.DarkRed);
+                Printer.WriteLine("ERROR", "Call of Duty: Black Ops is supported, but this EXE is not.", ConsoleColor.DarkRed);
             }
         }
 
@@ -413,13 +322,13 @@ namespace Husky
         /// </summary>
         public static GfxSurface[] ReadGfxSufaces(ProcessReader reader, long address, int count)
         {
-            // Preallocate array
+            // Preallocate short array
             GfxSurface[] surfaces = new GfxSurface[count];
 
             // Loop number of indices we have
             for (int i = 0; i < count; i++)
                 // Add it
-                surfaces[i] = reader.ReadStruct<GfxSurface>(address + i * 40);
+                surfaces[i] = reader.ReadStruct<GfxSurface>(address + i * 80);
 
             // Done
             return surfaces;
@@ -465,7 +374,7 @@ namespace Husky
                         gfxVertex.Y,
                         gfxVertex.Z),
                     // Decode and set normal (from DTZxPorter - Wraith, same as XModels)
-                    Normal = VertexNormal.UnpackB(gfxVertex.Normal),
+                    Normal = VertexNormal.UnpackA(gfxVertex.Normal),
                     // Set UV
                     UV = new Vector2(gfxVertex.U, 1 - gfxVertex.V)
                 };
@@ -483,58 +392,18 @@ namespace Husky
             // Read Material
             var material = reader.ReadStruct<Material>(address);
             // Create new OBJ Image
-            var objMaterial = new WavefrontOBJ.Material(Path.GetFileNameWithoutExtension(reader.ReadNullTerminatedString(reader.ReadInt64(address)).Replace("*", "")));
+            var objMaterial = new WavefrontOBJ.Material(Path.GetFileNameWithoutExtension(reader.ReadNullTerminatedString(reader.ReadInt32(address)).Replace("*", "").Replace(")", "").Replace("(", "")));
             // Loop over images
             for (byte i = 0; i < material.ImageCount; i++)
             {
                 // Read Material Image
-                var materialImage = reader.ReadStruct<MaterialImage64A>(material.ImageTablePointer + i * Marshal.SizeOf<MaterialImage64A>());
+                var materialImage = reader.ReadStruct<MaterialImage32A>(material.ImageTablePointer + i * Marshal.SizeOf<MaterialImage32A>());
                 // Check for color map for now
                 if (materialImage.SemanticHash == 0xA0AB1041)
-                    objMaterial.DiffuseMap = "_images\\\\" + reader.ReadNullTerminatedString(reader.ReadInt64(materialImage.ImagePointer + 96)) + ".png";
+                    objMaterial.DiffuseMap = "_images\\\\" + reader.ReadNullTerminatedString(reader.ReadInt32(materialImage.ImagePointer + 44)) + ".png";
             }
             // Done
             return objMaterial;
         }
-
-        /// <summary>
-        /// Reads Static Models
-        /// </summary>
-        public unsafe static List<IWMap.Entity> ReadStaticModels(ProcessReader reader, long address, int count)
-        {
-            // Resulting Entities
-            List<IWMap.Entity> entities = new List<IWMap.Entity>(count);
-            // Read buffer
-            var byteBuffer = reader.ReadBytes(address, count * Marshal.SizeOf<GfxStaticModel>());
-            // Loop number of models we have
-            for (int i = 0; i < count; i++)
-            {
-                // Read Struct
-                var staticModel = ByteUtil.BytesToStruct<GfxStaticModel>(byteBuffer, i * Marshal.SizeOf<GfxStaticModel>());
-                // Model Name
-                var modelName = reader.ReadNullTerminatedString(reader.ReadInt64(staticModel.ModelPointer));
-                // New Matrix
-                var matrix = new Rotation.Matrix();
-                // Copy X Values
-                matrix.Values[0] = staticModel.Matrix[0];
-                matrix.Values[1] = staticModel.Matrix[1];
-                matrix.Values[2] = staticModel.Matrix[2];
-                // Copy Y Values
-                matrix.Values[4] = staticModel.Matrix[3];
-                matrix.Values[5] = staticModel.Matrix[4];
-                matrix.Values[6] = staticModel.Matrix[5];
-                // Copy Z Values
-                matrix.Values[8] = staticModel.Matrix[6];
-                matrix.Values[9] = staticModel.Matrix[7];
-                matrix.Values[10] = staticModel.Matrix[8];
-                // Convert to Euler
-                var euler = matrix.ToEuler();
-                // Add it
-                entities.Add(IWMap.Entity.CreateMiscModel(modelName, new Vector3(staticModel.X, staticModel.Y, staticModel.Z), Rotation.ToDegrees(euler), staticModel.ModelScale));
-            }
-            // Done
-            return entities;
-        }
-
     }
 }

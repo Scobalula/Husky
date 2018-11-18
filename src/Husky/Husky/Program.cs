@@ -36,16 +36,25 @@ namespace Husky
         /// </summary>
         static readonly Dictionary<string, Tuple<long, long, Action<ProcessReader, long, long>>> Games = new Dictionary<string, Tuple<long, long, Action<ProcessReader, long, long>>>()
         {
-            { "CoDWaW",             new Tuple<long, long, Action<ProcessReader, long, long>>(0x8DC828,          0x8DC5D0,               WorldatWar.ExportBSPData) },
+            // Call of Duty: World At War
             { "CoDWaWmp",           new Tuple<long, long, Action<ProcessReader, long, long>>(0x8D0958,          0x8D06E8,               WorldatWar.ExportBSPData) },
+            { "CoDWaW",             new Tuple<long, long, Action<ProcessReader, long, long>>(0x8DC828,          0x8DC5D0,               WorldatWar.ExportBSPData) },
+            // Call of Duty: Modern Warfare 2
             { "iw4mp",              new Tuple<long, long, Action<ProcessReader, long, long>>(0x6F81D0,          0x6F7F08,               ModernWarfare2.ExportBSPData) },
             { "iw4sp",              new Tuple<long, long, Action<ProcessReader, long, long>>(0x7307F8,          0x730510,               ModernWarfare2.ExportBSPData) },
+            // Call of Duty: Modern Warfare 3
             { "iw5mp",              new Tuple<long, long, Action<ProcessReader, long, long>>(0x8AB258,          0x8AAF78,               ModernWarfare3.ExportBSPData) },
             { "iw5sp",              new Tuple<long, long, Action<ProcessReader, long, long>>(0x92AD20,          0x92AA40,               ModernWarfare3.ExportBSPData) },
+            // Call of Duty: Black Ops
+            { "BlackOps",           new Tuple<long, long, Action<ProcessReader, long, long>>(0xB741B8,          0xB73EF8,               BlackOps.ExportBSPData) },
+            { "BlackOpsMP",         new Tuple<long, long, Action<ProcessReader, long, long>>(0xBF2C30,          0xBF2970,               BlackOps.ExportBSPData) },
+            // Call of Duty: Ghosts
             { "iw6mp64_ship",       new Tuple<long, long, Action<ProcessReader, long, long>>(0x1409E4F20,       0x1409E4E20,            Ghosts.ExportBSPData) },
             { "iw6sp64_ship",       new Tuple<long, long, Action<ProcessReader, long, long>>(0x14086DCB0,       0x14086DBB0,            Ghosts.ExportBSPData) },
+            // Call of Duty: Advanced Warfare
             { "s1_mp64_ship",       new Tuple<long, long, Action<ProcessReader, long, long>>(0x1409B40D0,       0x1409B4B90,            AdvancedWarfare.ExportBSPData) },
             { "s1_sp64_ship",       new Tuple<long, long, Action<ProcessReader, long, long>>(0x140804690,       0x140804140,            AdvancedWarfare.ExportBSPData) },
+            // Call of Duty: Modern Warfare Remastered
             { "h1_mp64_ship",       new Tuple<long, long, Action<ProcessReader, long, long>>(0x10B4460,         0x10B3C80,              ModernWarfareRM.ExportBSPData) },
             { "h1_sp64_ship",       new Tuple<long, long, Action<ProcessReader, long, long>>(0xEC9FB0,          0xEC97D0,               ModernWarfareRM.ExportBSPData) },
         };
@@ -68,11 +77,12 @@ namespace Husky
             // Information
             Printer.WriteLine("INFO", "Currently supports:");
             Printer.WriteLine("INFO", "     CoD: WAW    -   BSP Geometry");
+            Printer.WriteLine("INFO", "     CoD: BO1    -   BSP Geometry");
             Printer.WriteLine("INFO", "     CoD: MW2    -   BSP Geometry");
             Printer.WriteLine("INFO", "     CoD: MW3    -   BSP Geometry");
-            Printer.WriteLine("INFO", "     CoD: AW     -   BSP Geometry");
-            Printer.WriteLine("INFO", "     CoD: Ghosts -   BSP Geometry");
-            Printer.WriteLine("INFO", "     CoD: MWR    -   BSP Geometry");
+            Printer.WriteLine("INFO", "     CoD: AW     -   BSP Geometry, Static Models");
+            Printer.WriteLine("INFO", "     CoD: Ghosts -   BSP Geometry, Static Models");
+            Printer.WriteLine("INFO", "     CoD: MWR    -   BSP Geometry, Static Models");
             Printer.WriteLine("INFO", "Usage:");
             Printer.WriteLine("INFO", "     Run a supported game, then run Husky");
             // Scanning
@@ -112,8 +122,8 @@ namespace Husky
             }
             catch(Exception e)
             {
-                Console.WriteLine(e);
                 Printer.WriteException(e, "ERROR", "An unhandled exception has occured:");
+                Console.WriteLine(e);
             }
         }
     }
