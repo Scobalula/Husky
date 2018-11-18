@@ -10,6 +10,8 @@ Husky is a BSP Extractor for Call of Duty. It can rip the raw vertex/face data t
 * Call of Duty: Ghosts
 * Call of Duty: Modern Warfare Remastered
 
+**Call of Duty: Black Ops 3 will never be supported, for obvious reasons**
+
 ### Downloading/Using Husky
 
 To download Husky, go to the [Releases](https://github.com/Scobalula/Husky/releases) and download the latest build.
@@ -21,6 +23,10 @@ Once the map is exported, you will have 3 files for it:
 * **mapname**.obj - Main 3D Obj File
 * **mapname**.mtl - Material Info
 * **mapname**.txt - A search string for Wraith/Greyhound (only contains color maps)
+
+For Ghosts, AW, and MWR:
+
+* **mapname**.map - Map file with **static** model locations and rotations
 
 If you wish to use textures (be warned they can result in high RAM usage) then make sure to have the _images folder in the same location as the obj/mtl file and export PNGs (do not ask for other formats, it's staying as PNG, do a find/replace if you want to use other formats).
 
@@ -47,6 +53,10 @@ Some of the exported models can get pretty big. While all have loaded in Maya wi
 * Q: The exported OBJ is corrupt when imported?
 
 * A: Tons of BSPs across all supported games have been verified, if you have find a legitimate instance of a corrupt export, please open an issue with the name of the map, etc. as much info as you can.
+
+* Q: Why is there a bunch of geo at the origin?
+
+* A: It appears in all games, script brushmodels are at the origin, and I assume the map_ents assets or some other data is used to tell the game where to move them to on load.
 
 ## Credits
 
