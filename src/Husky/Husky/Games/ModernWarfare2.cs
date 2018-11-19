@@ -89,12 +89,32 @@ namespace Husky
             /// <summary>
             /// Unknown Bytes (more BSP data we probably don't care for)
             /// </summary>
-            public fixed byte Padding3[0x184];
+            public fixed byte Padding3[0x130];
+
+            /// <summary>
+            /// Number of Static Models
+            /// </summary>
+            public int GfxStaticModelsCount { get; set; }
+
+            /// <summary>
+            /// Unknown Bytes (more BSP data we probably don't care for)
+            /// </summary>
+            public fixed byte Padding4[0x50];
 
             /// <summary>
             /// Pointer to the Gfx Index Data
             /// </summary>
             public int GfxSurfacesPointer { get; set; }
+
+            /// <summary>
+            /// Null Padding
+            /// </summary>
+            public int Padding5 { get; set; }
+
+            /// <summary>
+            /// Pointer to the Gfx Static Models
+            /// </summary>
+            public int GfxStaticModelsPointer { get; set; }
         }
 
         /// <summary>
@@ -173,7 +193,7 @@ namespace Husky
         /// <summary>
         /// Reads BSP Data
         /// </summary>
-        public static void ExportBSPData(ProcessReader reader, long assetPoolsAddress, long assetSizesAddress)
+        public static void ExportBSPData(ProcessReader reader, long assetPoolsAddress, long assetSizesAddress, string gameType)
         {
             // Found her
             Printer.WriteLine("INFO", "Found supported game: Call of Duty: Modern Warfare 2");
@@ -194,19 +214,26 @@ namespace Husky
                 }
                 else
                 {
+                    // New IW Map
+                    var mapFile = new IWMap();
                     // Print Info
                     Printer.WriteLine("INFO", String.Format("Loaded Gfx Map     -   {0}", gfxMapName));
                     Printer.WriteLine("INFO", String.Format("Loaded Map         -   {0}", mapName));
                     Printer.WriteLine("INFO", String.Format("Vertex Count       -   {0}", gfxMapAsset.GfxVertexCount));
                     Printer.WriteLine("INFO", String.Format("Indices Count      -   {0}", gfxMapAsset.GfxIndicesCount));
                     Printer.WriteLine("INFO", String.Format("Surface Count      -   {0}", gfxMapAsset.SurfaceCount));
+                    Printer.WriteLine("INFO", String.Format("Model Count        -   {0}", gfxMapAsset.GfxStaticModelsCount));
+
+                    // Build output Folder
+                    string outputName = Path.Combine("exported_maps", "modern_warfare_2", gameType, mapName, mapName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputName));
 
                     // Stop watch
                     var stopWatch = Stopwatch.StartNew();
 
                     // Read Vertices
                     Printer.WriteLine("INFO", "Parsing vertex data....");
-                    var vertices = ReadGfxVertices(reader, gfxMapAsset.GfxVerticesPointer, (int)gfxMapAsset.GfxVertexCount);
+                    var vertices = ReadGfxVertices(reader, gfxMapAsset.GfxVerticesPointer, gfxMapAsset.GfxVertexCount);
                     Printer.WriteLine("INFO", String.Format("Parsed vertex data in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
 
                     // Reset timer
@@ -214,7 +241,7 @@ namespace Husky
 
                     // Read Indices
                     Printer.WriteLine("INFO", "Parsing surface indices....");
-                    var indices = ReadGfxIndices(reader, gfxMapAsset.GfxIndicesPointer, (int)gfxMapAsset.GfxIndicesCount);
+                    var indices = ReadGfxIndices(reader, gfxMapAsset.GfxIndicesPointer, gfxMapAsset.GfxIndicesCount);
                     Printer.WriteLine("INFO", String.Format("Parsed indices in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
 
                     // Reset timer
@@ -280,7 +307,7 @@ namespace Husky
                     }
 
                     // Save it
-                    obj.Save(Path.ChangeExtension(gfxMapName, ".obj"));
+                    obj.Save(outputName + ".obj");
 
                     // Build search strinmg
                     string searchString = "";
@@ -290,7 +317,11 @@ namespace Husky
                         searchString += String.Format("{0},", Path.GetFileNameWithoutExtension(imageName));
 
                     // Dump it
-                    File.WriteAllText(Path.ChangeExtension(gfxMapName, ".txt"), searchString);
+                    File.WriteAllText(outputName + "_search_string.txt", searchString);
+
+                    // Read entities and dump to map
+                    mapFile.Entities.AddRange(ModernWarfare3.ReadStaticModels(reader, gfxMapAsset.GfxStaticModelsPointer, gfxMapAsset.GfxStaticModelsCount));
+                    mapFile.DumpToMap(outputName + ".map");
 
                     // Done
                     Printer.WriteLine("INFO", String.Format("Converted to OBJ in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
@@ -355,9 +386,9 @@ namespace Husky
                 {
                     // Set offset
                     Position = new Vector3(
-                        gfxVertex.X,
-                        gfxVertex.Y,
-                        gfxVertex.Z),
+                        gfxVertex.X * 2.54,
+                        gfxVertex.Y * 2.54,
+                        gfxVertex.Z * 2.54),
                     // Decode and set normal (from DTZxPorter - Wraith, same as XModels)
                     Normal = VertexNormal.UnpackA(gfxVertex.Normal),
                     // Set UV

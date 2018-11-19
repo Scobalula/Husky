@@ -270,7 +270,7 @@ namespace Husky
         /// <summary>
         /// Reads BSP Data
         /// </summary>
-        public static void ExportBSPData(ProcessReader reader, long assetPoolsAddress, long assetSizesAddress)
+        public static void ExportBSPData(ProcessReader reader, long assetPoolsAddress, long assetSizesAddress, string gameType)
         {
             // Found her
             Printer.WriteLine("INFO", "Found supported game: Call of Duty: Advanced Warfare");
@@ -301,6 +301,10 @@ namespace Husky
                     Printer.WriteLine("INFO", String.Format("Indices Count      -   {0}", gfxMapAsset.GfxIndicesCount));
                     Printer.WriteLine("INFO", String.Format("Surface Count      -   {0}", gfxMapAsset.SurfaceCount));
                     Printer.WriteLine("INFO", String.Format("Model Count        -   {0}", gfxMapAsset.GfxStaticModelsCount));
+
+                    // Build output Folder
+                    string outputName = Path.Combine("exported_maps", "advanced_warfare", gameType, mapName, mapName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputName));
 
                     // Stop watch
                     var stopWatch = Stopwatch.StartNew();
@@ -381,21 +385,21 @@ namespace Husky
                     }
 
                     // Save it
-                    obj.Save(Path.ChangeExtension(gfxMapName, ".obj"));
+                    obj.Save(outputName + ".obj");
 
                     // Build search strinmg
                     string searchString = "";
 
                     // Loop through images, and append each to the search string (for Wraith/Greyhound)
-                    foreach(string imageName in imageNames)
+                    foreach (string imageName in imageNames)
                         searchString += String.Format("{0},", Path.GetFileNameWithoutExtension(imageName));
 
                     // Dump it
-                    File.WriteAllText(Path.ChangeExtension(gfxMapName, ".txt"), searchString);
+                    File.WriteAllText(outputName + "_search_string.txt", searchString);
 
                     // Read entities and dump to map
-                    mapFile.Entities.AddRange(ReadStaticModels(reader, gfxMapAsset.GfxStaticModelsPointer, gfxMapAsset.GfxStaticModelsCount));
-                    mapFile.DumpToMap(Path.ChangeExtension(gfxMapName, ".map"));
+                    mapFile.Entities.AddRange(ReadStaticModels(reader, gfxMapAsset.GfxStaticModelsPointer, (int)gfxMapAsset.GfxStaticModelsCount));
+                    mapFile.DumpToMap(outputName + ".map");
 
                     // Done
                     Printer.WriteLine("INFO", String.Format("Converted to OBJ in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
@@ -461,9 +465,9 @@ namespace Husky
                 {
                     // Set offset
                     Position = new Vector3(
-                        gfxVertex.X,
-                        gfxVertex.Y,
-                        gfxVertex.Z),
+                        gfxVertex.X * 2.54,
+                        gfxVertex.Y * 2.54,
+                        gfxVertex.Z * 2.54),
                     // Decode and set normal (from DTZxPorter - Wraith, same as XModels)
                     Normal = VertexNormal.UnpackB(gfxVertex.Normal),
                     // Set UV

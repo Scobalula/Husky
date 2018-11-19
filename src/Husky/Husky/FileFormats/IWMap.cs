@@ -40,8 +40,8 @@ namespace Husky
                 var result = new Entity("misc_model");
                 // Add properties
                 result.KeyValuePairs["model"] = modelName;
-                result.KeyValuePairs["origin"] = String.Format("{0} {1} {2}", origin.X, origin.Y, origin.Z);
-                result.KeyValuePairs["angles"] = String.Format("{1} {2} {0}", angles.X, angles.Y, angles.Z);
+                result.KeyValuePairs["origin"] = String.Format("{0:0.0000} {1:0.0000} {2:0.0000}", origin.X, origin.Y, origin.Z);
+                result.KeyValuePairs["angles"] = String.Format("{1:0.0000} {2:0.0000} {0:0.0000}", angles.X, angles.Y, angles.Z);
                 result.KeyValuePairs["modelscale"] = modelScale.ToString();
                 // Ship her back
                 return result;

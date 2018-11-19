@@ -35,5 +35,24 @@
                 (float)((((packedNormal.Value >> 10) & 0x3FF) / 1023.0) * 2.0 - 1.0),
                 (float)((((packedNormal.Value >> 20) & 0x3FF) / 1023.0) * 2.0 - 1.0));
         }
+
+        /// <summary>
+        /// Unpacks a Vertex Normal from: Bo2
+        /// </summary>
+        /// <param name="packedNormal">Packed 4 byte Vertex Normal</param>
+        /// <returns>Resulting Vertex Normal</returns>
+        public static Vector3 UnpackC(PackedUnitVector packedNormal)
+        {
+            // Resulting values
+            var builtX = new FloatToInt { Integer = (uint)((packedNormal.Value & 0x3FF) - 2 * (packedNormal.Value & 0x200) + 0x40400000) };
+            var builtY = new FloatToInt { Integer = (uint)((((packedNormal.Value >> 10) & 0x3FF) - 2 * ((packedNormal.Value >> 10) & 0x200) + 0x40400000)) };
+            var builtZ = new FloatToInt { Integer = (uint)((((packedNormal.Value >> 20) & 0x3FF) - 2 * ((packedNormal.Value >> 20) & 0x200) + 0x40400000)) };
+
+            // Return decoded vector
+            return new Vector3(
+                (builtX.Float - 3.0) * 8208.0312f,
+                (builtY.Float - 3.0) * 8208.0312f,
+                (builtZ.Float - 3.0) * 8208.0312f);
+        }
     }
 }

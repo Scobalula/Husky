@@ -4,8 +4,11 @@ Husky is a BSP Extractor for Call of Duty. It can rip the raw vertex/face data t
 ### Supported Games
 
 * Call of Duty: World at War
-* Call of Duty: Modern Warfare 3
+* Call of Duty: Black Ops
+* Call of Duty: Black Ops 2
+* Call of Duty: Modern Warfare
 * Call of Duty: Modern Warfare 2
+* Call of Duty: Modern Warfare 3
 * Call of Duty: Advanced Warfare
 * Call of Duty: Ghosts
 * Call of Duty: Modern Warfare Remastered
@@ -16,16 +19,13 @@ Husky is a BSP Extractor for Call of Duty. It can rip the raw vertex/face data t
 
 To download Husky, go to the [Releases](https://github.com/Scobalula/Husky/releases) and download the latest build.
 
-To use Husky, simply run the game, load the map you want to extract, and run Husky.
+To use Husky, simply run the game, load the map you want to extract, and run Husky. In some cases you may need to run Husky as an administator.
 
 Once the map is exported, you will have 3 files for it:
 
 * **mapname**.obj - Main 3D Obj File
 * **mapname**.mtl - Material Info
 * **mapname**.txt - A search string for Wraith/Greyhound (only contains color maps)
-
-For Ghosts, AW, and MWR:
-
 * **mapname**.map - Map file with **static** model locations and rotations
 
 If you wish to use textures (be warned they can result in high RAM usage) then make sure to have the _images folder in the same location as the obj/mtl file and export PNGs (do not ask for other formats, it's staying as PNG, do a find/replace if you want to use other formats).

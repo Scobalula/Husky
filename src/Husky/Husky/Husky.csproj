@@ -56,6 +56,7 @@
     <Compile Include="FileFormats\IWMap.cs" />
     <Compile Include="FileFormats\WavefrontOBJ.cs" />
     <Compile Include="GameStructures\Shared.cs" />
+    <Compile Include="Games\BlackOps2.cs" />
     <Compile Include="Games\Ghosts.cs" />
     <Compile Include="Games\ModernWarfare3.cs" />
     <Compile Include="Games\ModernWarfare2.cs" />
@@ -63,9 +64,11 @@
     <Compile Include="Games\AdvancedWarfare.cs" />
     <Compile Include="Games\WorldAtWar.cs" />
     <Compile Include="Games\BlackOps.cs" />
+    <Compile Include="Games\ModernWarfare.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\Color.cs" />
+    <Compile Include="Utility\FloatToInt.cs" />
     <Compile Include="Utility\Rotation.cs" />
     <Compile Include="Utility\Vectors.cs" />
     <Compile Include="Utility\Vertex.cs" />
