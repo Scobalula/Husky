@@ -1,0 +1,140 @@
+﻿<Window x:Class="HuskyUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800" MinHeight="450" MinWidth="800">
+    <!-- Task Bar Progress -->
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo x:Name="TaskBarProgress"></TaskbarItemInfo>
+    </Window.TaskbarItemInfo>
+    <!-- Main Window -->
+    <Grid Background="#FF1E2127">
+        <!-- Side Bar Rectangle -->
+        <Rectangle Fill="#FF262B32" HorizontalAlignment="Left" Width="47"/>
+        <!-- Export Button -->
+        <Button Style="{StaticResource SidebarButton}" HorizontalAlignment="Left" ToolTip="Export the loaded GFX Map"  Width="47" Margin="0,0,0,0" Height="47" VerticalAlignment="Top" Click="ExportClick">
+            <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Stretch="Uniform">
+                <Canvas Canvas.Left="0" Canvas.Top="0" Width="58.064" Height="58.064">
+                    <Canvas.RenderTransform>
+                        <TranslateTransform X="0" Y="0"/>
+                    </Canvas.RenderTransform>
+                    <Canvas.Resources/>
+                    <Polygon xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Points="58.064,10.032 24.064,35.032 44.064,48.032 58.064,10.032 0,22.032 17.064,31.032 " Name="polygon2" FillRule="NonZero" Fill="#FF3E464F">
+                        <Polygon.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Polygon.RenderTransform>
+                    </Polygon>
+                    <Polygon xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Points="20.127,48.032 17.064,31.032 58.064,10.032 24.064,35.032 " Name="polygon4" FillRule="NonZero" Fill="#FF4E5763">
+                        <Polygon.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Polygon.RenderTransform>
+                    </Polygon>
+                    <Polygon xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Points="20.064,48.032 31.912,40.133 24.064,35.032 " Name="polygon6" FillRule="NonZero" Fill="#FF3E464F">
+                        <Polygon.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Polygon.RenderTransform>
+                    </Polygon>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas Name="g16">
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <MatrixTransform Matrix="0.76691526 0 0 0.76691526 6.7669162 6.7669162"/>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                </Canvas>
+            </Viewbox>
+        </Button>
+        <!-- About Button -->
+        <Button Style="{StaticResource SidebarButton}" HorizontalAlignment="Left" Click="AboutClick" VerticalAlignment="Bottom" Width="47" Height="47" ToolTip="About">
+            <Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Stretch="Uniform">
+                <Canvas Canvas.Left="0" Canvas.Top="0" Width="50" Height="50">
+                    <Canvas.RenderTransform>
+                        <TranslateTransform X="0" Y="0"/>
+                    </Canvas.RenderTransform>
+                    <Canvas.Resources/>
+                    <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="7" Canvas.Top="7" Width="36" Height="36" Fill="#FF3E464F" StrokeThickness="0.720339"/>
+                    <Line xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" X1="25" Y1="33.64407" X2="25" Y2="35.084747" Name="line4" StrokeThickness="1.440678" Stroke="#FFFFFFFF" StrokeMiterLimit="10" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" StrokeThickness="1.440678" Stroke="#FFFFFFFF" StrokeMiterLimit="10" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+                        <Path.Data>
+                            <PathGeometry Figures="m 19.957627 18.516949 c 0 -2.808602 2.296441 -5.081271 5.114407 -5.041652 2.6775 0.03746 4.932881 2.292118 4.970339 4.970339 0.02521 1.808771 -0.901865 3.402161 -2.312288 4.311949 C 25.976059 23.888517 25 25.908347 25 27.995169 v 2.047204" FillRule="NonZero"/>
+                        </Path.Data>
+                    </Path>
+                </Canvas>
+            </Viewbox>
+        </Button>
+        <!-- Console Box -->
+        <TextBox x:Name="ConsoleBox" Margin="57,10,10,10" TextWrapping="Wrap" Background="#FF262B32" IsReadOnly="True" BorderBrush="{x:Null}" Foreground="White" FontFamily="MS Gothic" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+        <!-- Dim Box for when dialogs are active -->
+        <Rectangle x:Name="DimBox" Fill="#82000000" Visibility="Hidden"/>
+    </Grid>
+</Window>

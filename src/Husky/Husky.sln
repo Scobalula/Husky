@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Husky", "Husky\Husky.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhilLibX", "PhilLibX\PhilLibX.csproj", "{8F5C1BA4-88C1-4177-B91B-DD093DC849B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HuskyUI", "HuskyUI\HuskyUI.csproj", "{5BC7C6FE-F65C-4F32-BC26-FAC69926F10E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{8F5C1BA4-88C1-4177-B91B-DD093DC849B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F5C1BA4-88C1-4177-B91B-DD093DC849B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F5C1BA4-88C1-4177-B91B-DD093DC849B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BC7C6FE-F65C-4F32-BC26-FAC69926F10E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BC7C6FE-F65C-4F32-BC26-FAC69926F10E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BC7C6FE-F65C-4F32-BC26-FAC69926F10E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BC7C6FE-F65C-4F32-BC26-FAC69926F10E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

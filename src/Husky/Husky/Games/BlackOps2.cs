@@ -322,10 +322,10 @@ namespace Husky
         /// <summary>
         /// Reads BSP Data
         /// </summary>
-        public static void ExportBSPData(ProcessReader reader, long assetPoolsAddress, long assetSizesAddress, string gameType)
+        public static void ExportBSPData(ProcessReader reader, long assetPoolsAddress, long assetSizesAddress, string gameType, Action<object> printCallback = null)
         {
             // Found her
-            Printer.WriteLine("INFO", "Found supported game: Call of Duty: Black Ops 2");
+            printCallback?.Invoke("Found supported game: Call of Duty: Black Ops 2");
             // Validate by XModel Name
             if (reader.ReadNullTerminatedString(reader.ReadInt32(reader.ReadInt32(assetPoolsAddress + 0x14) + 4)) == "defaultvehicle")
             {
@@ -339,19 +339,19 @@ namespace Husky
                 // Verify a BSP is actually loaded (if in base menu, etc, no map is loaded)
                 if (String.IsNullOrWhiteSpace(gfxMapName))
                 {
-                    Printer.WriteLine("ERROR", "No BSP loaded. Enter Main Menu or a Map to load in the required assets.", ConsoleColor.DarkRed);
+                    printCallback?.Invoke("No BSP loaded. Enter Main Menu or a Map to load in the required assets.");
                 }
                 else
                 {
                     // New IW Map
                     var mapFile = new IWMap();
                     // Print Info
-                    Printer.WriteLine("INFO", String.Format("Loaded Gfx Map     -   {0}", gfxMapName));
-                    Printer.WriteLine("INFO", String.Format("Loaded Map         -   {0}", mapName));
-                    Printer.WriteLine("INFO", String.Format("Vertex Count       -   {0}", gfxMapAsset.GfxVertexCount));
-                    Printer.WriteLine("INFO", String.Format("Indices Count      -   {0}", gfxMapAsset.GfxIndicesCount));
-                    Printer.WriteLine("INFO", String.Format("Surface Count      -   {0}", gfxMapAsset.SurfaceCount));
-                    Printer.WriteLine("INFO", String.Format("Model Count        -   {0}", gfxMapAsset.GfxStaticModelsCount));
+                    printCallback?.Invoke(String.Format("Loaded Gfx Map     -   {0}", gfxMapName));
+                    printCallback?.Invoke(String.Format("Loaded Map         -   {0}", mapName));
+                    printCallback?.Invoke(String.Format("Vertex Count       -   {0}", gfxMapAsset.GfxVertexCount));
+                    printCallback?.Invoke(String.Format("Indices Count      -   {0}", gfxMapAsset.GfxIndicesCount));
+                    printCallback?.Invoke(String.Format("Surface Count      -   {0}", gfxMapAsset.SurfaceCount));
+                    printCallback?.Invoke(String.Format("Model Count        -   {0}", gfxMapAsset.GfxStaticModelsCount));
 
                     // Build output Folder
                     string outputName = Path.Combine("exported_maps", "black_ops_2", gameType, mapName, mapName);
@@ -361,31 +361,31 @@ namespace Husky
                     var stopWatch = Stopwatch.StartNew();
 
                     // Read Vertices
-                    Printer.WriteLine("INFO", "Parsing vertex data....");
-                    var vertexBuffer = ReadGfxVertices(reader, gfxMapAsset.GfxVerticesPointer, gfxMapAsset.GfxVertexBufferSize);
-                    Printer.WriteLine("INFO", String.Format("Parsed vertex data in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
+                    printCallback?.Invoke("Parsing vertex data....");
+                    var vertexBuffer = reader.ReadBytes(gfxMapAsset.GfxVerticesPointer, gfxMapAsset.GfxVertexBufferSize);
+                    printCallback?.Invoke(String.Format("Parsed vertex data in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
 
                     // Reset timer
                     stopWatch.Restart();
 
                     // Read Indices
-                    Printer.WriteLine("INFO", "Parsing surface indices....");
+                    printCallback?.Invoke("Parsing surface indices....");
                     var indices = ReadGfxIndices(reader, gfxMapAsset.GfxIndicesPointer, gfxMapAsset.GfxIndicesCount);
-                    Printer.WriteLine("INFO", String.Format("Parsed indices in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
+                    printCallback?.Invoke(String.Format("Parsed indices in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
 
                     // Reset timer
                     stopWatch.Restart();
 
                     // Read Indices
-                    Printer.WriteLine("INFO", "Parsing surfaces....");
+                    printCallback?.Invoke("Parsing surfaces....");
                     var surfaces = ReadGfxSufaces(reader, gfxMapAsset.GfxSurfacesPointer, gfxMapAsset.SurfaceCount);
-                    Printer.WriteLine("INFO", String.Format("Parsed surfaces in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
+                    printCallback?.Invoke(String.Format("Parsed surfaces in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
 
                     // Reset timer
                     stopWatch.Restart();
 
                     // Write OBJ
-                    Printer.WriteLine("INFO", "Converting to OBJ....");
+                    printCallback?.Invoke("Converting to OBJ....");
 
                     // Create new OBJ
                     var obj = new WavefrontOBJ();
@@ -474,13 +474,13 @@ namespace Husky
                     mapFile.DumpToMap(outputName + ".map");
 
                     // Done
-                    Printer.WriteLine("INFO", String.Format("Converted to OBJ in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
+                    printCallback?.Invoke(String.Format("Converted to OBJ in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
                 }
 
             }
             else
             {
-                Printer.WriteLine("ERROR", "Call of Duty: Black Ops 2 is supported, but this EXE is not.", ConsoleColor.DarkRed);
+                printCallback?.Invoke("Call of Duty: Black Ops 2 is supported, but this EXE is not.");
             }
         }
 
@@ -518,15 +518,6 @@ namespace Husky
         }
 
         /// <summary>
-        /// Reads Gfx Vertices
-        /// </summary>
-        public static byte[] ReadGfxVertices(ProcessReader reader, long address, int size)
-        {
-            // Done
-            return reader.ReadBytes(address, size);
-        }
-
-        /// <summary>
         /// Unpacks a vertex 
         /// </summary>
         /// <param name="packedVertex">Vertex to unpack</param>
@@ -541,9 +532,9 @@ namespace Husky
                         packedVertex.Y * 2.54,
                         packedVertex.Z * 2.54),
                 // Decode and set normal (from DTZxPorter - Wraith, same as XModels)
-                Normal = VertexNormal.UnpackC(packedVertex.Normal),
+                Normal = VertexNormalUnpacking.MethodC(packedVertex.Normal),
                 // Set UV
-                UV = new Vector2(packedVertex.U, 1 - packedVertex.V)
+                UV = new Vector2(HalfFloats.ToFloat(packedVertex.U), 1 - HalfFloats.ToFloat(packedVertex.V))
             };
         }
 

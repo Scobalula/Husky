@@ -20,18 +20,85 @@ using PhilLibX.IO;
 using System;
 using System.IO;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Husky
 {
     /// <summary>
-    /// Ghosts Logic
+    /// WW2 Logic
     /// </summary>
-    class Ghosts
+    public class WorldWarII
     {
         /// <summary>
-        /// Ghosts Gfx Map Asset (some pointers we skip over point to DirectX routines, etc. if that means anything to anyone)
+        /// WW2 GfxMap TRZone Asset (some pointers we skip over point to DirectX routines, etc. if that means anything to anyone)
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public unsafe struct GfxMapTRZone
+        {
+            /// <summary>
+            /// Unknown Bytes
+            /// </summary>
+            public fixed byte Padding[0x98];
+
+            /// <summary>
+            /// A pointer to the name of the map 
+            /// </summary>
+            public long MapNamePointer { get; set; }
+
+            /// <summary>
+            /// Unknown Bytes
+            /// </summary>
+            public int Padding1 { get; set; }
+
+            /// <summary>
+            /// Number of Gfx Vertices (XYZ, etc.)
+            /// </summary>
+            public int GfxVertexCount { get; set; }
+
+            /// <summary>
+            /// Pointer to the Gfx Vertex Positions Data
+            /// </summary>
+            public long GfxVertexPositionsPointer { get; set; }
+
+            /// <summary>
+            /// Pointer to the Gfx Vertex Positions Data
+            /// </summary>
+            public long GfxVertexUnknownPointer { get; set; }
+
+            /// <summary>
+            /// Pointer to the Gfx Vertex Colors Data
+            /// </summary>
+            public long GfxVertexColorsPointer { get; set; }
+
+            /// <summary>
+            /// Pointer to the Gfx Vertex UVs Data
+            /// </summary>
+            public long GfxVertexUVsPointer { get; set; }
+
+            /// <summary>
+            /// Unknown Pointer
+            /// </summary>
+            public long GfxVertexUnknown2Pointer { get; set; }
+
+            /// <summary>
+            /// Pointer to the Gfx Vertex Normals Data
+            /// </summary>
+            public long GfxVertexNormalsPointer { get; set; }
+
+            /// <summary>
+            /// Unknown Pointer (Probably tangents)
+            /// </summary>
+            public long GfxVertexUnknown3Pointer { get; set; }
+
+            /// <summary>
+            /// Unknown Bytes
+            /// </summary>
+            public fixed byte Padding2[0x50];
+        }
+
+        /// <summary>
+        /// IW GfxMap Asset (some pointers we skip over point to DirectX routines, etc. if that means anything to anyone)
         /// </summary>
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public unsafe struct GfxMap
@@ -59,22 +126,7 @@ namespace Husky
             /// <summary>
             /// Unknown Bytes (Possibly counts, pointers, etc. for other data we don't care about)
             /// </summary>
-            public fixed byte Padding1[0xD4];
-
-            /// <summary>
-            /// Number of Gfx Vertices (XYZ, etc.)
-            /// </summary>
-            public int GfxVertexCount { get; set; }
-
-            /// <summary>
-            /// Pointer to the Gfx Vertex Data
-            /// </summary>
-            public long GfxVerticesPointer { get; set; }
-
-            /// <summary>
-            /// Unknown Bytes (more BSP data we probably don't care for)
-            /// </summary>
-            public fixed byte Padding2[0x20];
+            public fixed byte Padding1[0x3A8];
 
             /// <summary>
             /// Number of Gfx Indices (for Faces)
@@ -87,29 +139,29 @@ namespace Husky
             public long GfxIndicesPointer { get; set; }
 
             /// <summary>
-            /// Pointers, etc.
+            /// Points, etc.
             /// </summary>
-            public fixed byte Padding3[0x770];
+            public fixed byte Padding2[0x750];
 
             /// <summary>
             /// Number of Static Models
             /// </summary>
-            public int GfxStaticModelsCount { get; set; }
+            public long GfxStaticModelsCount { get; set; }
 
             /// <summary>
-            /// Pointers, etc.
+            /// Unknown Bytes (more BSP data we probably don't care for)
             /// </summary>
-            public fixed byte Padding4[0xC4];
+            public fixed byte Padding3[0x468];
 
             /// <summary>
-            /// Pointer to the Gfx Index Data
+            /// Pointer to the Gfx Surfaces
             /// </summary>
             public long GfxSurfacesPointer { get; set; }
 
             /// <summary>
-            /// Pointer
+            /// Unknown Bytes (more BSP data we probably don't care for)
             /// </summary>
-            public long Padding5 { get; set; }
+            public fixed byte Padding4[0x18];
 
             /// <summary>
             /// Pointer to the Gfx Static Models
@@ -118,7 +170,7 @@ namespace Husky
         }
 
         /// <summary>
-        /// Gfx Map Surface Ghosts
+        /// Gfx Map Surface
         /// </summary>
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public unsafe struct GfxSurface
@@ -134,11 +186,6 @@ namespace Husky
             public int VertexIndex { get; set; }
 
             /// <summary>
-            /// Unknown Bytes (float?)
-            /// </summary>
-            public fixed byte Padding[4];
-
-            /// <summary>
             /// Number of Vertices this surface has
             /// </summary>
             public ushort VertexCount { get; set; }
@@ -149,14 +196,19 @@ namespace Husky
             public ushort FaceCount { get; set; }
 
             /// <summary>
+            /// Unknown Bytes
+            /// </summary>
+            public fixed byte Padding[0xC];
+
+            /// <summary>
             /// Base Face Index (this is what allows the GfxMap to have 65k+ faces with only 2 byte indices)
             /// </summary>
             public int FaceIndex { get; set; }
 
             /// <summary>
-            /// Null Padding
+            /// Unknown Bytes
             /// </summary>
-            public int Padding1 { get; set; }
+            public fixed byte Padding2[4];
 
             /// <summary>
             /// Pointer to the Material Asset of this Surface
@@ -166,7 +218,7 @@ namespace Husky
             /// <summary>
             /// Unknown Bytes 
             /// </summary>
-            public fixed byte Padding2[8];
+            public fixed byte Padding3[0x10];
         }
 
         /// <summary>
@@ -182,7 +234,7 @@ namespace Husky
             /// <summary>
             /// Unknown Bytes (Flags, settings, etc.)
             /// </summary>
-            public fixed byte UnknownBytes[0x1BC];
+            public fixed byte UnknownBytes[0x9A];
 
             /// <summary>
             /// Number of Images this Material has
@@ -192,7 +244,7 @@ namespace Husky
             /// <summary>
             /// Unknown Bytes (Flags, settings, etc.)
             /// </summary>
-            public fixed byte UnknownBytes1[0xB];
+            public fixed byte UnknownBytes1[0x15];
 
             /// <summary>
             /// A pointer to the Tech Set this Material uses
@@ -207,17 +259,54 @@ namespace Husky
             /// <summary>
             /// UnknownPointer (Probably settings that changed based off TechSet)
             /// </summary>
-            public long UnknownPointer1 { get; set; }
+            public long UnknownPointer { get; set; }
 
             /// <summary>
-            /// UnknownPointer (Probably settings that changed based off TechSet)
+            /// Null Bytes
             /// </summary>
-            public long UnknownPointer2 { get; set; }
+            public long Padding { get; set; }
 
             /// <summary>
             /// Unknown Bytes (Flags, settings, etc.)
             /// </summary>
-            public fixed byte UnknownBytes2[0x1B8];
+            public fixed byte UnknownBytes2[0x90];
+        }
+
+        /// <summary>
+        /// Vertex Position
+        /// </summary>
+        public struct GfxVertexPosition
+        {
+            /// <summary>
+            /// X Origin
+            /// </summary>
+            public float X { get; set; }
+
+            /// <summary>
+            /// Y Origin
+            /// </summary>
+            public float Y { get; set; }
+
+            /// <summary>
+            /// Z Origin
+            /// </summary>
+            public float Z { get; set; }
+        }
+
+        /// <summary>
+        /// Vertex Position
+        /// </summary>
+        public struct GfxVertexUV
+        {
+            /// <summary>
+            /// X Origin
+            /// </summary>
+            public float U { get; set; }
+
+            /// <summary>
+            /// Y Origin
+            /// </summary>
+            public float V { get; set; }
         }
 
         /// <summary>
@@ -252,9 +341,9 @@ namespace Husky
             public float ModelScale { get; set; }
 
             /// <summary>
-            /// Null Padding
+            /// Unknown Bytes
             /// </summary>
-            public int Padding { get; set; }
+            public fixed byte UnknownBytes2[0x14];
 
             /// <summary>
             /// Pointer to the XModel Asset
@@ -264,7 +353,7 @@ namespace Husky
             /// <summary>
             /// Unknown Bytes
             /// </summary>
-            public fixed byte UnknownBytes2[0x70];
+            public fixed byte UnknownBytes3[0x30];
         }
 
         /// <summary>
@@ -273,13 +362,14 @@ namespace Husky
         public static void ExportBSPData(ProcessReader reader, long assetPoolsAddress, long assetSizesAddress, string gameType, Action<object> printCallback = null)
         {
             // Found her
-            printCallback?.Invoke("Found supported game: Call of Duty: Ghosts");
+            printCallback?.Invoke("Found supported game: Call of Duty: World War II");
 
             // Validate by XModel Name
-            if (reader.ReadNullTerminatedString(reader.ReadInt64(reader.ReadInt64(assetPoolsAddress + 0x20) + 8)) == "void")
+            if (reader.ReadNullTerminatedString(reader.ReadInt64(reader.ReadInt64(reader.GetBaseAddress() + assetPoolsAddress + 0x50) + 8)) == "empty_model")
             {
                 // Load BSP Pools (they only have a size of 1 so we don't care about reading more than 1)
-                var gfxMapAsset = reader.ReadStruct<GfxMap>(reader.ReadInt64(assetPoolsAddress + 0xD0));
+                var gfxMapAsset = reader.ReadStruct<GfxMap>(reader.ReadInt64(reader.GetBaseAddress() + assetPoolsAddress + 0x138));
+                var gfxMapTrZoneAsset = reader.ReadStruct<GfxMapTRZone>(reader.ReadInt64(reader.GetBaseAddress() + assetPoolsAddress + 0x140) + 8);
 
                 // Name
                 string gfxMapName = reader.ReadNullTerminatedString(gfxMapAsset.NamePointer);
@@ -297,13 +387,13 @@ namespace Husky
                     // Print Info
                     printCallback?.Invoke(String.Format("Loaded Gfx Map     -   {0}", gfxMapName));
                     printCallback?.Invoke(String.Format("Loaded Map         -   {0}", mapName));
-                    printCallback?.Invoke(String.Format("Vertex Count       -   {0}", gfxMapAsset.GfxVertexCount));
+                    printCallback?.Invoke(String.Format("Vertex Count       -   {0}", gfxMapTrZoneAsset.GfxVertexCount));
                     printCallback?.Invoke(String.Format("Indices Count      -   {0}", gfxMapAsset.GfxIndicesCount));
                     printCallback?.Invoke(String.Format("Surface Count      -   {0}", gfxMapAsset.SurfaceCount));
                     printCallback?.Invoke(String.Format("Model Count        -   {0}", gfxMapAsset.GfxStaticModelsCount));
 
                     // Build output Folder
-                    string outputName = Path.Combine("exported_maps", "ghosts", gameType, mapName, mapName);
+                    string outputName = Path.Combine("exported_maps", "world_war_2", gameType, mapName, mapName);
                     Directory.CreateDirectory(Path.GetDirectoryName(outputName));
 
                     // Stop watch
@@ -311,7 +401,12 @@ namespace Husky
 
                     // Read Vertices
                     printCallback?.Invoke("Parsing vertex data....");
-                    var vertices = ReadGfxVertices(reader, gfxMapAsset.GfxVerticesPointer, gfxMapAsset.GfxVertexCount);
+                    var vertices = ReadGfxVertices(
+                        reader,
+                        gfxMapTrZoneAsset.GfxVertexPositionsPointer,
+                        gfxMapTrZoneAsset.GfxVertexUVsPointer,
+                        gfxMapTrZoneAsset.GfxVertexNormalsPointer,
+                        gfxMapTrZoneAsset.GfxVertexCount);
                     printCallback?.Invoke(String.Format("Parsed vertex data in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
 
                     // Reset timer
@@ -324,7 +419,6 @@ namespace Husky
 
                     // Reset timer
                     stopWatch.Restart();
-
                     // Read Indices
                     printCallback?.Invoke("Parsing surfaces....");
                     var surfaces = ReadGfxSufaces(reader, gfxMapAsset.GfxSurfacesPointer, gfxMapAsset.SurfaceCount);
@@ -349,7 +443,7 @@ namespace Husky
 
                     // Image Names (for Search String)
                     HashSet<string> imageNames = new HashSet<string>();
-
+                    int x = 0;
                     // Append Faces
                     foreach (var surface in surfaces)
                     {
@@ -382,6 +476,8 @@ namespace Husky
                                 obj.Faces.Add(objFace);
                             }
                         }
+
+                        x++;
                     }
 
                     // Save it
@@ -398,7 +494,7 @@ namespace Husky
                     File.WriteAllText(outputName + "_search_string.txt", searchString);
 
                     // Read entities and dump to map
-                    mapFile.Entities.AddRange(ReadStaticModels(reader, gfxMapAsset.GfxStaticModelsPointer, gfxMapAsset.GfxStaticModelsCount));
+                    mapFile.Entities.AddRange(ReadStaticModels(reader, gfxMapAsset.GfxStaticModelsPointer, (int)gfxMapAsset.GfxStaticModelsCount));
                     mapFile.DumpToMap(outputName + ".map");
 
                     // Done
@@ -408,7 +504,7 @@ namespace Husky
             }
             else
             {
-                printCallback?.Invoke("Call of Duty: Ghosts is supported, but this EXE is not.");
+                printCallback?.Invoke("Call of Duty: World War II is supported, but this EXE is not.");
             }
         }
 
@@ -417,13 +513,13 @@ namespace Husky
         /// </summary>
         public static GfxSurface[] ReadGfxSufaces(ProcessReader reader, long address, int count)
         {
-            // Preallocate short array
+            // Preallocate array
             GfxSurface[] surfaces = new GfxSurface[count];
 
             // Loop number of indices we have
             for (int i = 0; i < count; i++)
                 // Add it
-                surfaces[i] = reader.ReadStruct<GfxSurface>(address + i * 40);
+                surfaces[i] = reader.ReadStruct<GfxSurface>(address + i * 56);
 
             // Done
             return surfaces;
@@ -448,30 +544,34 @@ namespace Husky
         /// <summary>
         /// Reads Gfx Vertices
         /// </summary>
-        public static Vertex[] ReadGfxVertices(ProcessReader reader, long address, int count)
+        public static Vertex[] ReadGfxVertices(ProcessReader reader, long positionsAddress, long uvsAddress, long normalsAddress, int count)
         {
             // Preallocate vertex array
             Vertex[] vertices = new Vertex[count];
             // Read buffer
-            var byteBuffer = reader.ReadBytes(address, count * 44);
+            var positionsBuffer = reader.ReadBytes(positionsAddress, count * 12);
+            var uvsBuffer = reader.ReadBytes(uvsAddress, count * 8);
+            var normalsBuffer = reader.ReadBytes(normalsAddress, count * 4);
             // Loop number of vertices we have
             for (int i = 0; i < count; i++)
             {
                 // Read Struct
-                var gfxVertex = ByteUtil.BytesToStruct<GfxVertex>(byteBuffer, i * 44);
+                var gfxVertexPosition = ByteUtil.BytesToStruct<GfxVertexPosition>(positionsBuffer, i * 12);
+                var gfxVertexUV = ByteUtil.BytesToStruct<GfxVertexUV>(uvsBuffer, i * 8);
+                var gfxVertexNormal = ByteUtil.BytesToStruct<PackedUnitVector>(normalsBuffer, i * 4);
 
                 // Create new SEModel Vertex
                 vertices[i] = new Vertex()
                 {
                     // Set offset
                     Position = new Vector3(
-                        gfxVertex.X * 2.54,
-                        gfxVertex.Y * 2.54,
-                        gfxVertex.Z * 2.54),
+                        gfxVertexPosition.X * 2.54,
+                        gfxVertexPosition.Y * 2.54,
+                        gfxVertexPosition.Z * 2.54),
                     // Decode and set normal (from DTZxPorter - Wraith, same as XModels)
-                    Normal = VertexNormalUnpacking.MethodB(gfxVertex.Normal),
+                    Normal = VertexNormalUnpacking.MethodB(gfxVertexNormal),
                     // Set UV
-                    UV = new Vector2(gfxVertex.U, 1 - gfxVertex.V)
+                    UV = new Vector2(gfxVertexUV.U, 1 - gfxVertexUV.V)
                 };
             }
 
@@ -495,7 +595,7 @@ namespace Husky
                 var materialImage = reader.ReadStruct<MaterialImage64A>(material.ImageTablePointer + i * Marshal.SizeOf<MaterialImage64A>());
                 // Check for color map for now
                 if (materialImage.SemanticHash == 0xA0AB1041)
-                    objMaterial.DiffuseMap = "_images\\\\" + reader.ReadNullTerminatedString(reader.ReadInt64(materialImage.ImagePointer + 96)) + ".png";
+                    objMaterial.DiffuseMap = "_images\\\\" + reader.ReadNullTerminatedString(reader.ReadInt64(materialImage.ImagePointer)) + ".png";
             }
             // Done
             return objMaterial;
@@ -538,11 +638,6 @@ namespace Husky
             }
             // Done
             return entities;
-        }
-
-        public static void ResolveAddresses(ProcessReader reader, string gameType)
-        {
-
         }
     }
 }

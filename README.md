@@ -3,23 +3,25 @@ Husky is a BSP Extractor for Call of Duty. It can rip the raw vertex/face data t
 
 ### Supported Games
 
-* Call of Duty: World at War
-* Call of Duty: Black Ops
-* Call of Duty: Black Ops 2
 * Call of Duty: Modern Warfare
 * Call of Duty: Modern Warfare 2
 * Call of Duty: Modern Warfare 3
-* Call of Duty: Advanced Warfare
 * Call of Duty: Ghosts
+* Call of Duty: Infinite Warfare
+* Call of Duty: World at War
+* Call of Duty: Black Ops
+* Call of Duty: Black Ops 2
+* Call of Duty: Advanced Warfare
+* Call of DUty: World War 2
 * Call of Duty: Modern Warfare Remastered
 
-**Call of Duty: Black Ops 3 will never be supported, for obvious reasons**
+**Call of Duty: Black Ops 3 will never be supported, to avoid people ripping custom maps, etc.**
 
 ### Downloading/Using Husky
 
 To download Husky, go to the [Releases](https://github.com/Scobalula/Husky/releases) and download the latest build.
 
-To use Husky, simply run the game, load the map you want to extract, and run Husky. In some cases you may need to run Husky as an administator.
+To use Husky, simply run the game, load the map you want to extract, and run Husky, then click the paper airplane to export the loaded map. In some cases you may need to run Husky as an administator.
 
 Once the map is exported, you will have 3 files for it:
 
@@ -28,17 +30,19 @@ Once the map is exported, you will have 3 files for it:
 * **mapname**.txt - A search string for Wraith/Greyhound (only contains color maps)
 * **mapname**.map - Map file with **static** model locations and rotations
 
-If you wish to use textures (be warned they can result in high RAM usage) then make sure to have the _images folder in the same location as the obj/mtl file and export PNGs (do not ask for other formats, it's staying as PNG, do a find/replace if you want to use other formats).
+If you wish to use textures (be warned they can result in high RAM usage) then make sure to have the _images folder (use Wraith/Greyhound to export the required images) in the same location as the obj/mtl file and export PNGs (do not ask for other formats, it's staying as PNG, do a find/replace if you want to use other formats).
 
 ### License/Disclaimers
 
-Husky is licensed under the GPL license and it and its source code is free to use and modify under the. Husky comes with NO warranty, any damages caused are solely the responsibility of the user. See the LICENSE file for more information.
+Husky is licensed under the GPL license and it and its source code is free to use and modify under the terms of the GPL. Husky comes with NO warranty, any damages caused are solely the responsibility of the user. See the LICENSE file for more information.
 
-All BSP data extracted using Husky is property of the developers, etc. Husky simply parses the data out, what you do with the data is your reponsibility.
+**All** BSP data extracted using Husky is property of the developers, etc. and with this in mind you need to understand the limitation of what you can do with the data. Husky simply parses it out, what you do with it, is your responsibility.
 
 Some of the exported models can get pretty big. While all have loaded in Maya with no issue, make sure to have available resources available to load and view them.
 
-**Husky is currently in alpha, and with that in mind, bugs, errors, you know, the bad stuff.**
+Husky is provided ***AS IS***, do not ask how to do XYZ, how to import it into X program, etc. You need to know what you're doing, we can't hold your hand through it.
+
+Also I've noticed several people asking how to import it into Unity/Unreal, there is a fine line between using the Geo to remake a map in another Call of Duty Game using its own SDK **vs** using the Geo as it is in your game/IP, for example, so ensure you know what you're doing, copyright wise.
 
 ## FAQ
 
@@ -56,11 +60,11 @@ Some of the exported models can get pretty big. While all have loaded in Maya wi
 
 * Q: Why is there a bunch of geo at the origin?
 
-* A: It appears in all games, script brushmodels are at the origin, and I assume the map_ents assets or some other data is used to tell the game where to move them to on load.
+* A: It appears in all games, script brushmodels are at the origin, and I assume the map_ents assets or some other data is used to tell the game where to move them to on load. This will remain as is.
 
 ## Credits
 
-* DTZxPorter - Normal Unpacking Code from Wraith + Other misc info from Wraith, SELib
+* DTZxPorter - Normal Unpacking Code from Wraith, Half Floats code, Other misc info from Wraith.
 * Anna Baker - [Icon](https://thenounproject.com/term/husky/1121992/) ([https://thenounproject.com/anna.baker194/](https://thenounproject.com/anna.baker194/))
 
 ## Support Me

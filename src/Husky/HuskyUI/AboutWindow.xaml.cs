@@ -15,26 +15,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ------------------------------------------------------------------------
-using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.Windows;
 
-namespace Husky
+namespace HuskyUI
 {
     /// <summary>
-    /// A class that contains both a float and an int in the same bytes, to mimick C++ Unions
+    /// Interaction logic for AboutWindow.xaml
     /// </summary>
-    [StructLayout(LayoutKind.Explicit)]
-    class FloatToInt
+    public partial class AboutWindow : Window
     {
-        /// <summary>
-        /// Integer Value
-        /// </summary>
-        [FieldOffset(0)]
-        public uint Integer;
+        public AboutWindow()
+        {
+            InitializeComponent();
+        }
 
-        /// <summary>
-        /// Floating Point Value
-        /// </summary>
-        [FieldOffset(0)]
-        public float Float;
+        private void DonateButtonClick(object sender, RoutedEventArgs e)
+        {
+            Process.Start("http://paypal.me/Scobalula");
+        }
+
+        private void HomePageButtonClick(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/Scobalula/Husky/");
+        }
     }
 }

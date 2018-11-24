@@ -1,0 +1,18 @@
+﻿<Window x:Class="HuskyUI.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HuskyUI"
+        mc:Ignorable="d"
+        Title="About Husky" Height="170.5" Width="400" WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize" WindowStyle="ToolWindow">
+    <Grid Background="#FF1E2127">
+        <Label Content="Husky - Call of Duty BSP Extractor" HorizontalAlignment="Left" Margin="105,10,0,0" VerticalAlignment="Top" Height="27" Width="279" Background="{x:Null}" Foreground="White"/>
+        <Label Content="Developed by Scobalula" HorizontalAlignment="Left" Margin="105,37,0,0" VerticalAlignment="Top" Height="27" Width="279" Background="{x:Null}" Foreground="White"/>
+        <Label x:Name="VersionLabel" Content="Version: {0}" HorizontalAlignment="Left" Margin="105,64,0,0" VerticalAlignment="Top" Height="27" Width="279" Background="{x:Null}" Foreground="White"/>
+        <Button Style="{StaticResource SidebarButton}" x:Name="HomePageButton" Click="HomePageButtonClick" Content="Github Repo" HorizontalAlignment="Left" Margin="10,0,0,10" Width="90" Height="27" VerticalAlignment="Bottom"/>
+        <Button Style="{StaticResource SidebarButton}" x:Name="DonateButton" Click="DonateButtonClick" Content="Donate" HorizontalAlignment="Left" Margin="105,0,0,10" Width="90" Height="27" VerticalAlignment="Bottom"/>
+        <Image Margin="10,10,294,41" Source="icon.png" Stretch="Fill"/>
+    </Grid>
+</Window>

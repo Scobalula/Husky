@@ -29,12 +29,12 @@ namespace Husky
     /// <summary>
     /// Game Definition (AssetDB Address, Sizes Address, Game Type ID (MP, SP, ZM, etc.), Export Method
     /// </summary>
-    using GameDefinition = Tuple<long, long, string, Action<ProcessReader, long, long, string>>;
+    using GameDefinition = Tuple<long, long, string, Action<ProcessReader, long, long, string, Action<object>>>;
 
     /// <summary>
     /// Main Program Class
     /// </summary>
-    class Program
+    public class HuskyUtil
     {
         /// <summary>
         /// Game Addresses & Methods (Asset DB and Asset Pool Sizes) (Some are relative due to ASLR)
@@ -53,64 +53,33 @@ namespace Husky
             // Call of Duty: Modern Warfare 3
             { "iw5mp",              new GameDefinition(0x8AB258,          0x8AAF78,       "mp",               ModernWarfare3.ExportBSPData) },
             { "iw5sp",              new GameDefinition(0x92AD20,          0x92AA40,       "sp",               ModernWarfare3.ExportBSPData) },
+            // Call of Duty: Black Ops
+            { "BlackOps",           new GameDefinition(0xB741B8,          0xB73EF8,       "sp",               BlackOps.ExportBSPData) },
+            { "BlackOpsMP",         new GameDefinition(0xBF2C30,          0xBF2970,       "mp",               BlackOps.ExportBSPData) },
             // Call of Duty: Black Ops 2
             { "t6zm",               new GameDefinition(0xD41240,          0xD40E80,       "zm",               BlackOps2.ExportBSPData) },
             { "t6mp",               new GameDefinition(0xD4B340,          0xD4AF80,       "mp",               BlackOps2.ExportBSPData) },
             { "t6sp",               new GameDefinition(0xBD46B8,          0xBD42F8,       "sp",               BlackOps2.ExportBSPData) },
-            // Call of Duty: Black Ops
-            { "BlackOps",           new GameDefinition(0xB741B8,          0xB73EF8,       "sp",               BlackOps.ExportBSPData) },
-            { "BlackOpsMP",         new GameDefinition(0xBF2C30,          0xBF2970,       "mp",               BlackOps.ExportBSPData) },
             // Call of Duty: Ghosts
             { "iw6mp64_ship",       new GameDefinition(0x1409E4F20,       0x1409E4E20,    "mp",               Ghosts.ExportBSPData) },
             { "iw6sp64_ship",       new GameDefinition(0x14086DCB0,       0x14086DBB0,    "sp",               Ghosts.ExportBSPData) },
+            // Call of Duty: Infinite Warfare
+            { "iw7_ship",           new GameDefinition(0x1414663D0,       0x141466290,    "core",             InfiniteWarfare.ExportBSPData) },
             // Call of Duty: Advanced Warfare
             { "s1_mp64_ship",       new GameDefinition(0x1409B40D0,       0x1409B4B90,    "mp",               AdvancedWarfare.ExportBSPData) },
             { "s1_sp64_ship",       new GameDefinition(0x140804690,       0x140804140,    "sp",               AdvancedWarfare.ExportBSPData) },
+            // Call of Duty: World War II
+            { "s2_mp64_ship",       new GameDefinition(0xC05370,          0xC05370,       "mp",               WorldWarII.ExportBSPData) },
+            { "s2_sp64_ship",       new GameDefinition(0x9483F0,          0xBCC5E0,       "sp",               WorldWarII.ExportBSPData) },
             // Call of Duty: Modern Warfare Remastered
             { "h1_mp64_ship",       new GameDefinition(0x10B4460,         0x10B3C80,      "mp",               ModernWarfareRM.ExportBSPData) },
             { "h1_sp64_ship",       new GameDefinition(0xEC9FB0,          0xEC97D0,       "sp",               ModernWarfareRM.ExportBSPData) },
         };
 
         /// <summary>
-        /// Main Method
-        /// </summary>
-        /// <param name="args">Command Line Args.</param>
-        static void Main(string[] args)
-        {
-            // Set stuffs
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
-            Console.Title = "Husky";
-            // Initial Info
-            Printer.WriteLine("INIT", "────────────────────────────────────────────────────");
-            Printer.WriteLine("INIT", "Husky - Call of Duty BSP Exporter");
-            Printer.WriteLine("INIT", "By Scobalula");
-            Printer.WriteLine("INIT", String.Format("Version: {0}", Assembly.GetExecutingAssembly().GetName().Version));
-            Printer.WriteLine("INIT", "────────────────────────────────────────────────────");
-            // Information
-            Printer.WriteLine("INFO", "Currently supports:");
-            Printer.WriteLine("INFO", "     CoD: WAW");
-            Printer.WriteLine("INFO", "     CoD: BO1");
-            Printer.WriteLine("INFO", "     CoD: MW");
-            Printer.WriteLine("INFO", "     CoD: MW2");
-            Printer.WriteLine("INFO", "     CoD: MW3");
-            Printer.WriteLine("INFO", "     CoD: AW");
-            Printer.WriteLine("INFO", "     CoD: Ghosts");
-            Printer.WriteLine("INFO", "     CoD: MWR");
-            Printer.WriteLine("INFO", "Usage:");
-            Printer.WriteLine("INFO", "     Run a supported game, then run Husky");
-            // Scanning
-            Printer.WriteLine("INFO", "Looking for a supported game....");
-            // Run exporter
-            LoadGame();
-            // Done
-            Printer.WriteLine("DONE", "Execution complete, press Enter to exit...");
-            Console.ReadLine();
-        }
-
-        /// <summary>
         /// Looks for matching game and loads BSP from it
         /// </summary>
-        static void LoadGame()
+        public static void LoadGame(Action<object> printCallback = null)
         {
             try
             {
@@ -124,7 +93,7 @@ namespace Husky
                     if (Games.TryGetValue(process.ProcessName, out var game))
                     {
                         // Export it
-                        game.Item4(new ProcessReader(process), game.Item1, game.Item2, game.Item3);
+                        game.Item4(new ProcessReader(process), game.Item1, game.Item2, game.Item3, printCallback);
 
                         // Done
                         return;
@@ -132,12 +101,12 @@ namespace Husky
                 }
 
                 // Failed
-                Printer.WriteLine("ERROR", "Failed to find a supported game, please ensure one of them is running.", ConsoleColor.DarkRed);
+                printCallback?.Invoke("Failed to find a supported game, please ensure one of them is running.");
             }
             catch(Exception e)
             {
-                Printer.WriteException(e, "ERROR", "An unhandled exception has occured:");
-                Console.WriteLine(e);
+                printCallback?.Invoke("An unhandled exception has occured:");
+                printCallback?.Invoke(e);
             }
         }
     }
