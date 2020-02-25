@@ -69,8 +69,8 @@ namespace Husky
             { "s1_mp64_ship",       new GameDefinition(0x1409B40D0,       0x1409B4B90,    "mp",               AdvancedWarfare.ExportBSPData) },
             { "s1_sp64_ship",       new GameDefinition(0x140804690,       0x140804140,    "sp",               AdvancedWarfare.ExportBSPData) },
             // Call of Duty: World War II
-            { "s2_mp64_ship",       new GameDefinition(0xC05370,          0xC05370,       "mp",               WorldWarII.ExportBSPData) },
-            { "s2_sp64_ship",       new GameDefinition(0x9483F0,          0xBCC5E0,       "sp",               WorldWarII.ExportBSPData) },
+            { "s2_mp64_ship",       new GameDefinition(0xC08470,          0xEB0C30,       "mp",               WorldWarII.ExportBSPData) },
+            { "s2_sp64_ship",       new GameDefinition(0x94FD10,          0xBD65E0,       "sp",               WorldWarII.ExportBSPData) },
             // Call of Duty: Modern Warfare Remastered
             { "h1_mp64_ship",       new GameDefinition(0x10B4460,         0x10B3C80,      "mp",               ModernWarfareRM.ExportBSPData) },
             { "h1_sp64_ship",       new GameDefinition(0xEC9FB0,          0xEC97D0,       "sp",               ModernWarfareRM.ExportBSPData) },
