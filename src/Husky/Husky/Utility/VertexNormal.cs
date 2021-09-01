@@ -72,5 +72,25 @@ namespace Husky
                 (builtY.Float - 3.0) * 8208.0312f,
                 (builtZ.Float - 3.0) * 8208.0312f);
         }
+
+        /// <summary>
+        /// Unpacks a Vertex Normal from: Bo3
+        /// </summary>
+        /// <param name="packedNormal">Packed 4 byte Vertex Normal</param>
+        /// <returns>Resulting Vertex Normal</returns>
+        public static Vector3 MethodD(PackedUnitVector packedNormal)
+        {
+            // Unpack normal
+            int packedX = (((packedNormal.Value >> 0) & ((1 << 10) - 1)) - 512);
+            int packedY = (((packedNormal.Value >> 10) & ((1 << 10) - 1)) - 512);
+            int packedZ = (((packedNormal.Value >> 20) & ((1 << 10) - 1)) - 512);
+
+            // Return decoded vector
+            return new Vector3(
+                packedX / 511.0,
+                packedY / 511.0,
+                packedZ / 511.0);
+
+        }
     }
 }

@@ -207,4 +207,25 @@ namespace Husky
         /// </summary>
         public long ImagePointer { get; set; }
     }
+
+    /// <summary>
+    /// Bo3 Material Image Struct
+    /// </summary>
+    public unsafe struct MaterialImage64B
+    {
+        /// <summary>
+        /// A pointer to the image asset
+        /// </summary>
+        public long ImagePointer { get; set; }
+
+        /// <summary>
+        /// Semantic Hash (i.e. colorMap, colorMap00, etc.) Varies from MTL type, base ones like colorMap are always the same
+        /// </summary>
+        public uint SemanticHash { get; set; }
+
+        /// <summary>
+        /// End Bytes (Usage, etc.)
+        /// </summary>
+        public fixed byte Padding[0x14];
+    }
 }

@@ -60,6 +60,8 @@ namespace Husky
             { "t6zm",               new GameDefinition(0xD41240,          0xD40E80,       "zm",               BlackOps2.ExportBSPData) },
             { "t6mp",               new GameDefinition(0xD4B340,          0xD4AF80,       "mp",               BlackOps2.ExportBSPData) },
             { "t6sp",               new GameDefinition(0xBD46B8,          0xBD42F8,       "sp",               BlackOps2.ExportBSPData) },
+            // Call of Duty: Black Ops III
+            { "BlackOps3",          new GameDefinition(0x94093F0,         0,              "core",             BlackOps3.ExportBSPData) },
             // Call of Duty: Ghosts
             { "iw6mp64_ship",       new GameDefinition(0x1409E4F20,       0x1409E4E20,    "mp",               Ghosts.ExportBSPData) },
             { "iw6sp64_ship",       new GameDefinition(0x14086DCB0,       0x14086DBB0,    "sp",               Ghosts.ExportBSPData) },

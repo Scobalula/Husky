@@ -9,11 +9,12 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Husky</RootNamespace>
     <AssemblyName>HuskyLib</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -63,6 +64,7 @@
     <Compile Include="FileFormats\WavefrontOBJ.cs" />
     <Compile Include="GameStructures\Shared.cs" />
     <Compile Include="Games\BlackOps2.cs" />
+    <Compile Include="Games\BlackOps3.cs" />
     <Compile Include="Games\Ghosts.cs" />
     <Compile Include="Games\WorldWarII.cs" />
     <Compile Include="Games\ModernWarfare3.cs" />
