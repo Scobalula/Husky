@@ -26,10 +26,6 @@ using PhilLibX.IO;
 
 namespace Husky
 {
-    /// <summary>
-    /// Game Definition (AssetDB Address, Sizes Address, Game Type ID (MP, SP, ZM, etc.), Export Method
-    /// </summary>
-    using GameDefinition = Tuple<long, long, string, Action<ProcessReader, long, long, string, Action<object>>>;
 
     /// <summary>
     /// Main Program Class
@@ -39,7 +35,7 @@ namespace Husky
         /// <summary>
         /// Game Addresses & Methods (Asset DB and Asset Pool Sizes) (Some are relative due to ASLR)
         /// </summary>
-        static readonly Dictionary<string, GameDefinition> Games = new Dictionary<string, GameDefinition>()
+        static Dictionary<string, GameDefinition> Games = new Dictionary<string, GameDefinition>()
         {
             // Call of Duty: World At War
             { "CoDWaWmp",           new GameDefinition(0x8D0958,          0x8D06E8,       "mp",               WorldatWar.ExportBSPData) },
@@ -67,6 +63,8 @@ namespace Husky
             { "iw6sp64_ship",       new GameDefinition(0x14086DCB0,       0x14086DBB0,    "sp",               Ghosts.ExportBSPData) },
             // Call of Duty: Infinite Warfare
             { "iw7_ship",           new GameDefinition(0x1414663D0,       0x141466290,    "core",             InfiniteWarfare.ExportBSPData) },
+            // Parasyte (We use MW2019 as base)
+            { "Parasyte.CLI",       new GameDefinition(0,                 0,              "core",             ModernWarfare4.ExportBSPData) },
             // Call of Duty: Advanced Warfare
             { "s1_mp64_ship",       new GameDefinition(0x1409B40D0,       0x1409B4B90,    "mp",               AdvancedWarfare.ExportBSPData) },
             { "s1_sp64_ship",       new GameDefinition(0x140804690,       0x140804140,    "sp",               AdvancedWarfare.ExportBSPData) },
@@ -94,8 +92,14 @@ namespace Husky
                     // Check for it in dictionary
                     if (Games.TryGetValue(process.ProcessName, out var game))
                     {
-                        // Export it
-                        game.Item4(new ProcessReader(process), game.Item1, game.Item2, game.Item3, printCallback);
+                        // If process is Parasyte, parse DB first
+                        if (process.ProcessName == "Parasyte.CLI")
+                            game.ParseParasyteDB(process, printCallback);
+
+                        // Check for valid AssetPool Address
+                        if (game.AssetDBAddress != 0)
+                            // Export it
+                            game.Export(new ProcessReader(process), printCallback);
 
                         // Done
                         return;

@@ -228,4 +228,70 @@ namespace Husky
         /// </summary>
         public fixed byte Padding[0x14];
     }
+
+    /// <summary>
+    /// 3Float Vertex Position
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct GfxVertexPosition
+    {
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+
+        public Vector3 ToCentimeter()
+        {
+            return new Vector3(X * 2.54, Y * 2.54, Z * 2.54);
+        }
+    }
+
+    /// <summary>
+    /// 2Float Vertex UVs
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct GfxVertexUV
+    {
+        /// <summary>
+        /// U Texture Position
+        /// </summary>
+        public float U { get; set; }
+
+        /// <summary>
+        /// V Texture Position
+        /// </summary>
+        public float V { get; set; }
+    }
+
+    /// <summary>
+    /// XAsset loaded by Parasyte
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct ParasyteXAsset64
+    {
+        public uint Type { get; set; }
+        public uint HeaderSize { get; set; }
+        public ulong ID { get; set; }
+        public uint Temp { get; set; }
+        public long Owner { get; set; }
+        public long Previous { get; set; }
+        public long Next { get; set; }
+        public long FirstChild { get; set; }
+        public long LastChild { get; set; }
+        public long Header { get; set; }
+        public long ExtendedDataSize { get; set; }
+        public long ExtendedData { get; set; }
+        public long ExtendedDataPtrOffset { get; set; }
+
+    }
+
+    /// <summary>
+    /// XAsset pool from Parasyte
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct ParasyteXAssetPool64
+    {
+        public long FirstXAsset { get; set; }
+        public long LastXAsset { get; set; }
+        public long LookupTable { get; set; }
+    }
 }

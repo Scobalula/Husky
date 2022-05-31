@@ -16,6 +16,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ------------------------------------------------------------------------
 
+using System;
+
 namespace Husky
 {
     /// <summary>
@@ -86,6 +88,16 @@ namespace Husky
             Y = y;
             Z = z;
         }
+        public static Vector3 Cross(Vector3 left, Vector3 right)
+        {
+            Vector3 returnValue = new Vector3();
+
+            returnValue.X = left.Y * right.Z - left.Z * right.Y;
+            returnValue.Y = left.Z * right.X - left.X * right.Z;
+            returnValue.Z = left.X * right.Y - left.Y * right.X;
+
+            return returnValue;
+        }
     }
 
     /// <summary>
@@ -122,6 +134,31 @@ namespace Husky
             Y = y;
             Z = z;
             W = w;
+        }
+
+        public Vector3 ToEuler()
+        {
+            var result = new Vector3();
+
+            double t0 = 2.0 * (W * X + Y * Z);
+            double t1 = 1.0 - 2.0 * (X * X + Y * Y);
+
+            result.X = Math.Atan2(t0, t1);
+
+
+            double t2 = 2.0 * (W * Y - Z * X);
+
+            t2 = t2 > 1.0 ? 1.0 : t2;
+            t2 = t2 < -1.0 ? -1.0 : t2;
+            result.Y = Math.Asin(t2);
+
+
+            double t3 = +2.0 * (W * Z + X * Y);
+            double t4 = +1.0 - 2.0 * (Y * Y + Z * Z);
+
+            result.Z = Math.Atan2(t3, t4);
+
+            return result;
         }
     }
 }
