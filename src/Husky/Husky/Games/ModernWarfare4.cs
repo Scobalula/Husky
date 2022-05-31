@@ -110,172 +110,177 @@ namespace Husky
             // Name
             string gfxMapName = reader.ReadNullTerminatedString(gfxMapAsset.NamePointer);
             string mapName = reader.ReadNullTerminatedString(gfxMapAsset.MapNamePointer);
-
-            // Grab all loaded TR Zones
-            for (var current = reader.ReadStruct<ParasyteXAsset64>(trZonePool); ; current = reader.ReadStruct<ParasyteXAsset64>(current.Next))
+            if (!String.IsNullOrEmpty(gfxMapName))
             {
-                // Read TR Zone
-                var zone = reader.ReadStruct<MW4GfxWorldTRZone>(current.Header);
-                // Check if it has vertex data
-                if (zone.PositionsBufferPointer != 0)
+                // Grab all loaded TR Zones
+                for (var current = reader.ReadStruct<ParasyteXAsset64>(trZonePool); ; current = reader.ReadStruct<ParasyteXAsset64>(current.Next))
                 {
+                    // Read TR Zone
+                    var zone = reader.ReadStruct<MW4GfxWorldTRZone>(current.Header);
+                    // Check if it has vertex data
+                    if (zone.PositionsBufferPointer != 0)
+                    {
+                        // Add it
+                        Zones[zone.Index] = new GfxMapTRZoneData(
+                            reader.ReadNullTerminatedString(zone.NamePointer),
+                            reader.ReadBytes(zone.PositionsBufferPointer, zone.PositionsBufferSize),
+                            reader.ReadBytes(zone.DrawDataBufferPointer, zone.DrawDataBufferSize),
+                            reader.ReadBytes(zone.FaceIndicesBufferPointer, zone.FaceIndicesBufferSize * 2));
+                    }
+                    // Last one
+                    if (current.Next == 0)
+                        break;
+                }
+
+                // New IW Map
+                var mapFile = new IWMap();
+                // Print Info
+                printCallback?.Invoke("");
+                printCallback?.Invoke($"Loaded GfxMap           {gfxMapName}");
+                printCallback?.Invoke($"Loaded Map              {mapName}");
+                printCallback?.Invoke($"Loaded Surfaces         {gfxMapAsset.SurfaceCount}");
+                printCallback?.Invoke($"Loaded Surfaces Data    {gfxMapAsset.SurfaceDataCount}");
+                printCallback?.Invoke($"Loaded TR Zones         {gfxMapAsset.TrZoneCount}");
+                printCallback?.Invoke($"Loaded Unique Models    {gfxMapAsset.UniqueModelCount}");
+                printCallback?.Invoke($"Loaded Static Models    {gfxMapAsset.ModelInstCount}");
+
+                // Build output Folder
+                string outputName = Path.Combine("exported_maps", "modern_warfare_4", gameType, mapName, mapName);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputName));
+
+                // Stop watch
+                var stopWatch = Stopwatch.StartNew();
+
+                // Read Vertices
+                printCallback?.Invoke("Parsing surface data....");
+                var data = reader.ReadStructArray<MW4GfxSurfaceData>(gfxMapAsset.SurfaceDataPointer, gfxMapAsset.SurfaceDataCount);
+                printCallback?.Invoke(String.Format("Parsed surface data in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
+
+                // Reset timer
+                stopWatch.Restart();
+
+                // Read Indices
+                printCallback?.Invoke("Parsing surfaces....");
+                var surfaces = ReadGfxSufaces(reader, gfxMapAsset.SurfacesPointer, gfxMapAsset.SurfaceCount);
+                printCallback?.Invoke(String.Format("Parsed surfaces in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
+
+                // Reset timer
+                stopWatch.Restart();
+
+                // Write OBJ
+                printCallback?.Invoke("Converting to OBJ....");
+
+                // Create new OBJ
+                var obj = new WavefrontOBJ();
+
+                // Image Names (for Search String)
+                HashSet<string> imageNames = new HashSet<string>();
+
+                // Base vertex offset, update every surface
+                int vertexOffset = 0;
+                foreach (var surf in surfaces)
+                {
+                    var dataInfo = data[surf.DataIndex];
+                    var TRZone = Zones[dataInfo.TransientZone];
+                    var material = ReadMaterial(reader, surf.MaterialPointer);
+                    // Add to images
+                    imageNames.Add(material.DiffuseMap);
                     // Add it
-                    Zones[zone.Index] = new GfxMapTRZoneData(
-                        reader.ReadNullTerminatedString(zone.NamePointer),
-                        reader.ReadBytes(zone.PositionsBufferPointer, zone.PositionsBufferSize),
-                        reader.ReadBytes(zone.DrawDataBufferPointer, zone.DrawDataBufferSize),
-                        reader.ReadBytes(zone.FaceIndicesBufferPointer, zone.FaceIndicesBufferSize * 2));
+                    obj.AddMaterial(material);
+
+                    // Load Vertex Positions
+                    TRZone.PositionBufferReader.BaseStream.Position = dataInfo.PositionsPosition;
+                    for (int i = 0; i < surf.VertexCount; i++)
+                        obj.Vertices.Add(TRZone.PositionBufferReader.ReadStruct<GfxVertexPosition>().ToCentimeter());
+
+                    // Load Vertex Normals
+                    TRZone.DrawDataBufferReader.BaseStream.Position = dataInfo.NormalQuatPosition;
+                    for (int i = 0; i < surf.VertexCount; i++)
+                    {
+                        var PackedTangentFrame = TRZone.DrawDataBufferReader.ReadUInt32();
+                        var (tangent, bitangent, normal) = VertexNormalUnpacking.UnpackTangentFrame(PackedTangentFrame);
+                        obj.Normals.Add(normal);
+                    }
+
+                    // Load vertex UVs
+                    TRZone.DrawDataBufferReader.BaseStream.Position = dataInfo.UVsPosition;
+                    for (int i = 0; i < surf.VertexCount; i++)
+                    {
+                        var UV = TRZone.DrawDataBufferReader.ReadStruct<GfxVertexUV>();
+                        obj.UVs.Add(new Vector2(UV.U, 1 - UV.V));
+                        // Skip layer UVs
+                        int LayerUVPadding = (dataInfo.LayerCount - 1) * 8;
+                        TRZone.DrawDataBufferReader.BaseStream.Position += LayerUVPadding;
+                    }
+
+
+                    // Load faces
+                    TRZone.FaceIndicesBufferReader.BaseStream.Position = surf.FaceIndex * 2;
+                    for (int i = 0; i < surf.FaceCount; i++)
+                    {
+                        // Read face indices (indices are relative to each surface, so we add vertexOffset to it)
+                        var faceIndex1 = TRZone.FaceIndicesBufferReader.ReadUInt16() + vertexOffset;
+                        var faceIndex2 = TRZone.FaceIndicesBufferReader.ReadUInt16() + vertexOffset;
+                        var faceIndex3 = TRZone.FaceIndicesBufferReader.ReadUInt16() + vertexOffset;
+
+                        // new Obj Face
+                        var objFace = new WavefrontOBJ.Face(material.Name);
+
+                        // Add points
+                        objFace.Vertices[0] = new WavefrontOBJ.Face.Vertex(faceIndex1, faceIndex1, faceIndex1);
+                        objFace.Vertices[2] = new WavefrontOBJ.Face.Vertex(faceIndex2, faceIndex2, faceIndex2);
+                        objFace.Vertices[1] = new WavefrontOBJ.Face.Vertex(faceIndex3, faceIndex3, faceIndex3);
+
+                        // Add to OBJ
+                        obj.Faces.Add(objFace);
+                    }
+
+                    // Update vertex offset
+                    vertexOffset += surf.VertexCount;
                 }
-                // Last one
-                if (current.Next == 0)
-                    break;
+
+                // Save it
+                obj.Save(outputName + ".obj");
+
+                // Build search string
+                string searchString = "";
+
+                // Loop through images, and append each to the search string (for Wraith/Greyhound)
+                foreach (string imageName in imageNames)
+                    searchString += String.Format("{0},", Path.GetFileNameWithoutExtension(imageName));
+
+                // Dump it
+                File.WriteAllText(outputName + "_search_string.txt", searchString);
+
+                // Done
+                printCallback?.Invoke(String.Format("Converted to OBJ in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
+
+                // Reset timer
+                stopWatch.Restart();
+
+                printCallback?.Invoke("Parsing static models....");
+                // Read entities
+                var mapEntities = ReadStaticModels(
+                    reader,
+                    gfxMapAsset.ModelInstPtr,
+                    gfxMapAsset.ModelInstCount,
+                    gfxMapAsset.UniqueModelsPtr,
+                    gfxMapAsset.UniqueModelCount,
+                    gfxMapAsset.ModelInstDataPtr,
+                    gfxMapAsset.ModelInstDataCount);
+
+                // Add them to IWMap
+                mapFile.Entities.AddRange(mapEntities);
+                mapFile.DumpToMap(outputName + ".map");
+
+                printCallback?.Invoke(String.Format("Parsed models in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
+
+                printCallback?.Invoke("Done.");
             }
-
-            // New IW Map
-            var mapFile = new IWMap();
-            // Print Info
-            printCallback?.Invoke("");
-            printCallback?.Invoke($"Loaded GfxMap           {gfxMapName}");
-            printCallback?.Invoke($"Loaded Map              {mapName}");
-            printCallback?.Invoke($"Loaded Surfaces         {gfxMapAsset.SurfaceCount}");
-            printCallback?.Invoke($"Loaded Surfaces Data    {gfxMapAsset.SurfaceDataCount}");
-            printCallback?.Invoke($"Loaded TR Zones         {gfxMapAsset.TrZoneCount}");
-            printCallback?.Invoke($"Loaded Unique Models    {gfxMapAsset.UniqueModelCount}");
-            printCallback?.Invoke($"Loaded Static Models    {gfxMapAsset.ModelInstCount}");
-
-            // Build output Folder
-            string outputName = Path.Combine("exported_maps", "modern_warfare_4", gameType, mapName, mapName);
-            Directory.CreateDirectory(Path.GetDirectoryName(outputName));
-
-            // Stop watch
-            var stopWatch = Stopwatch.StartNew();
-
-            // Read Vertices
-            printCallback?.Invoke("Parsing surface data....");
-            var data = reader.ReadStructArray<MW4GfxSurfaceData>(gfxMapAsset.SurfaceDataPointer, gfxMapAsset.SurfaceDataCount);
-            printCallback?.Invoke(String.Format("Parsed surface data in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
-
-            // Reset timer
-            stopWatch.Restart();
-
-            // Read Indices
-            printCallback?.Invoke("Parsing surfaces....");
-            var surfaces = ReadGfxSufaces(reader, gfxMapAsset.SurfacesPointer, gfxMapAsset.SurfaceCount);
-            printCallback?.Invoke(String.Format("Parsed surfaces in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
-
-            // Reset timer
-            stopWatch.Restart();
-
-            // Write OBJ
-            printCallback?.Invoke("Converting to OBJ....");
-
-            // Create new OBJ
-            var obj = new WavefrontOBJ();
-
-            // Image Names (for Search String)
-            HashSet<string> imageNames = new HashSet<string>();
-
-            // Base vertex offset, update every surface
-            int vertexOffset = 0;
-            foreach (var surf in surfaces)
+            else
             {
-                var dataInfo = data[surf.DataIndex];
-                var TRZone = Zones[dataInfo.TransientZone];
-                var material = ReadMaterial(reader, surf.MaterialPointer);
-                // Add to images
-                imageNames.Add(material.DiffuseMap);
-                // Add it
-                obj.AddMaterial(material);
-
-                // Load Vertex Positions
-                TRZone.PositionBufferReader.BaseStream.Position = dataInfo.PositionsPosition;
-                for (int i = 0; i < surf.VertexCount; i++)
-                    obj.Vertices.Add(TRZone.PositionBufferReader.ReadStruct<GfxVertexPosition>().ToCentimeter());
-
-                // Load Vertex Normals
-                TRZone.DrawDataBufferReader.BaseStream.Position = dataInfo.NormalQuatPosition;
-                for (int i = 0; i < surf.VertexCount; i++)
-                {
-                    var PackedTangentFrame = TRZone.DrawDataBufferReader.ReadUInt32();
-                    var (tangent, bitangent, normal) = VertexNormalUnpacking.UnpackTangentFrame(PackedTangentFrame);
-                    obj.Normals.Add(normal);
-                }
-
-                // Load vertex UVs
-                TRZone.DrawDataBufferReader.BaseStream.Position = dataInfo.UVsPosition;
-                for (int i = 0; i < surf.VertexCount; i++)
-                {
-                    var UV = TRZone.DrawDataBufferReader.ReadStruct<GfxVertexUV>();
-                    obj.UVs.Add(new Vector2(UV.U, 1 - UV.V));
-                    // Skip layer UVs
-                    int LayerUVPadding = (dataInfo.LayerCount - 1) * 8;
-                    TRZone.DrawDataBufferReader.BaseStream.Position += LayerUVPadding;
-                }
-
-
-                // Load faces
-                TRZone.FaceIndicesBufferReader.BaseStream.Position = surf.FaceIndex * 2;
-                for (int i = 0; i < surf.FaceCount; i++)
-                {
-                    // Read face indices (indices are relative to each surface, so we add vertexOffset to it)
-                    var faceIndex1 = TRZone.FaceIndicesBufferReader.ReadUInt16() + vertexOffset;
-                    var faceIndex2 = TRZone.FaceIndicesBufferReader.ReadUInt16() + vertexOffset;
-                    var faceIndex3 = TRZone.FaceIndicesBufferReader.ReadUInt16() + vertexOffset;
-
-                    // new Obj Face
-                    var objFace = new WavefrontOBJ.Face(material.Name);
-
-                    // Add points
-                    objFace.Vertices[0] = new WavefrontOBJ.Face.Vertex(faceIndex1, faceIndex1, faceIndex1);
-                    objFace.Vertices[2] = new WavefrontOBJ.Face.Vertex(faceIndex2, faceIndex2, faceIndex2);
-                    objFace.Vertices[1] = new WavefrontOBJ.Face.Vertex(faceIndex3, faceIndex3, faceIndex3);
-
-                    // Add to OBJ
-                    obj.Faces.Add(objFace);
-                }
-
-                // Update vertex offset
-                vertexOffset += surf.VertexCount;
+                printCallback?.Invoke("No map was loaded.");
             }
-
-            // Save it
-            obj.Save(outputName + ".obj");
-
-            // Build search string
-            string searchString = "";
-
-            // Loop through images, and append each to the search string (for Wraith/Greyhound)
-            foreach (string imageName in imageNames)
-                searchString += String.Format("{0},", Path.GetFileNameWithoutExtension(imageName));
-
-            // Dump it
-            File.WriteAllText(outputName + "_search_string.txt", searchString);
-
-            // Done
-            printCallback?.Invoke(String.Format("Converted to OBJ in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
-
-            // Reset timer
-            stopWatch.Restart();
-
-            printCallback?.Invoke("Parsing static models....");
-            // Read entities
-            var mapEntities = ReadStaticModels(
-                reader,
-                gfxMapAsset.ModelInstPtr,
-                gfxMapAsset.ModelInstCount,
-                gfxMapAsset.UniqueModelsPtr,
-                gfxMapAsset.UniqueModelCount,
-                gfxMapAsset.ModelInstDataPtr,
-                gfxMapAsset.ModelInstDataCount);
-
-            // Add them to IWMap
-            mapFile.Entities.AddRange(mapEntities);
-            mapFile.DumpToMap(outputName + ".map");
-
-            printCallback?.Invoke(String.Format("Parsed models in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
-
-            printCallback?.Invoke("Done.");
-
         }
 
         /// <summary>
