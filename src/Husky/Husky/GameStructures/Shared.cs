@@ -263,35 +263,110 @@ namespace Husky
     }
 
     /// <summary>
-    /// XAsset loaded by Parasyte
+    /// Parasytes XAsset Structure.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct ParasyteXAsset64
+    public struct ParasyteXAsset64
     {
-        public uint Type { get; set; }
-        public uint HeaderSize { get; set; }
-        public ulong ID { get; set; }
-        public uint Temp { get; set; }
-        public long Owner { get; set; }
-        public long Previous { get; set; }
-        public long Next { get; set; }
-        public long FirstChild { get; set; }
-        public long LastChild { get; set; }
-        public long Header { get; set; }
-        public long ExtendedDataSize { get; set; }
-        public long ExtendedData { get; set; }
-        public long ExtendedDataPtrOffset { get; set; }
+        /// <summary>
+        /// The xasset type depending on the game it is from.
+        /// </summary>
+        public int Type;
 
-    }
+        /// <summary>
+        /// The xasset size.
+        /// </summary>
+        public int HeaderSize;
+
+        /// <summary>
+        /// The xasset ID.
+        /// </summary>
+        public long ID;
+
+        /// <summary>
+        /// The xasset Name.
+        /// </summary>
+        public long Name;
+
+        /// <summary>
+        /// Whether or not this asset is a tempt slot.
+        /// </summary>
+        public int Temp;
+
+        /// <summary>
+        /// Header Memory.
+        /// </summary>
+        public long HeaderMemory;
+
+        /// <summary>
+        /// The fast file that owns this asset.
+        /// </summary>
+        public long Owner;
+
+        /// <summary>
+        /// The previous xasset in the list.
+        /// </summary>
+        public long Previous;
+
+        /// <summary>
+        /// The next xasset in the list.
+        /// </summary>
+        public long Next;
+
+        /// <summary>
+        /// First child asset we have overriden.
+        /// </summary>
+        public long FirstChild;
+
+        /// <summary>
+        /// Last child asset we have overriden.
+        /// </summary>
+        public long LastChild;
+
+        /// <summary>
+        /// The asset header.
+        /// </summary>
+        public long Header;
+        /// <summary>
+        /// The size of the extended data.
+        /// </summary>
+        public long ExtendedDataSize;
+
+        /// <summary>
+        /// The extended data, if any.
+        /// </summary>
+        public long ExtendedData;
+
+        /// <summary>
+        /// The pointer that points to the extended data.
+        /// </summary>
+        public long ExtendedDataPtrOffset;
+    };
 
     /// <summary>
-    /// XAsset pool from Parasyte
+    /// Parasytes XAsset Pool Structure.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct ParasyteXAssetPool64
+    public struct ParasyteXAssetPool64
     {
-        public long FirstXAsset { get; set; }
-        public long LastXAsset { get; set; }
-        public long LookupTable { get; set; }
-    }
+        /// <summary>
+        /// The start of the asset chain.
+        /// </summary>
+        public long FirstXAsset;
+
+        /// <summary>
+        /// The end of the asset chain.
+        /// </summary>
+        public long LastXAsset;
+
+        /// <summary>
+        /// The asset hash table for this pool.
+        /// </summary>
+        public long LookupTable;
+
+        /// <summary>
+        /// Storage for asset headers for this pool.
+        /// </summary>
+        public long HeaderMemory;
+    };
 }

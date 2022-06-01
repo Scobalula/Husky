@@ -94,7 +94,7 @@ namespace Husky
             for (var current = reader.ReadStruct<ParasyteXAsset64>(gfxMapPool); ; current = reader.ReadStruct<ParasyteXAsset64>(current.Next))
             {
                 // Get GfxMap name
-                string assetName = reader.ReadNullTerminatedString(reader.ReadInt64(current.Header));
+                string assetName = reader.ReadNullTerminatedString(current.Name);
                 // Check if it's valid and is the last one
                 if (!String.IsNullOrEmpty(assetName) && current.Next == 0)
                 {
