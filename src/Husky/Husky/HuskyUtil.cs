@@ -67,6 +67,8 @@ namespace Husky
             { "iw6sp64_ship",       new GameDefinition(0x14086DCB0,       0x14086DBB0,    "sp",               Ghosts.ExportBSPData) },
             // Call of Duty: Infinite Warfare
             { "iw7_ship",           new GameDefinition(0x1414663D0,       0x141466290,    "core",             InfiniteWarfare.ExportBSPData) },
+            // Call of Duty: Infinite Warfare
+            { "Parasyte.CLI",       new GameDefinition(0,                 0,              "core",             ModernWarfare4.ExportBSPData) },
             // Call of Duty: Advanced Warfare
             { "s1_mp64_ship",       new GameDefinition(0x1409B40D0,       0x1409B4B90,    "mp",               AdvancedWarfare.ExportBSPData) },
             { "s1_sp64_ship",       new GameDefinition(0x140804690,       0x140804140,    "sp",               AdvancedWarfare.ExportBSPData) },

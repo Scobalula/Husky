@@ -62,8 +62,10 @@
   <ItemGroup>
     <Compile Include="FileFormats\IWMap.cs" />
     <Compile Include="FileFormats\WavefrontOBJ.cs" />
+    <Compile Include="GameStructures\ModernWarfare4_Offsets.cs" />
     <Compile Include="GameStructures\Shared.cs" />
     <Compile Include="Games\BlackOps2.cs" />
+    <Compile Include="Games\ModernWarare4.cs" />
     <Compile Include="Games\BlackOps3.cs" />
     <Compile Include="Games\Ghosts.cs" />
     <Compile Include="Games\WorldWarII.cs" />

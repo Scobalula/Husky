@@ -25,6 +25,7 @@
 // Description: A class to help with reading the memory of other processes.
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace PhilLibX.IO
 {
@@ -182,6 +183,22 @@ namespace PhilLibX.IO
             return MemoryUtil.ReadStruct<T>(Handle, address);
         }
 
+        /// <summary>
+        /// Reads an array of Struct Type from the Process Memory
+        /// </summary>
+        /// <typeparam name="T">Struct Type</typeparam>
+        /// <param name="address">Memory Address</param>
+        /// <param name="length">Array Length</param>
+        /// <returns>Resulting Array</returns>
+        public T[] ReadStructArray<T>(long address, int length)
+        {
+            T[] buffer = new T[length];
+            for (int i = 0; i < length; i++)
+            {
+                buffer[i] = ReadStruct<T>(address + i * Marshal.SizeOf(typeof(T)));
+            }
+            return buffer;
+        }
         /// <summary>
         /// Searches for bytes in the Processes Memory
         /// </summary>
