@@ -228,4 +228,145 @@ namespace Husky
         /// </summary>
         public fixed byte Padding[0x14];
     }
+
+    /// <summary>
+    /// 3Float Vertex Position
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct GfxVertexPosition
+    {
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+
+        public Vector3 ToCentimeter()
+        {
+            return new Vector3(X * 2.54, Y * 2.54, Z * 2.54);
+        }
+    }
+
+    /// <summary>
+    /// 2Float Vertex UVs
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct GfxVertexUV
+    {
+        /// <summary>
+        /// U Texture Position
+        /// </summary>
+        public float U { get; set; }
+
+        /// <summary>
+        /// V Texture Position
+        /// </summary>
+        public float V { get; set; }
+    }
+
+    /// <summary>
+    /// Parasytes XAsset Structure.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ParasyteXAsset64
+    {
+        /// <summary>
+        /// The xasset type depending on the game it is from.
+        /// </summary>
+        public int Type;
+
+        /// <summary>
+        /// The xasset size.
+        /// </summary>
+        public int HeaderSize;
+
+        /// <summary>
+        /// The xasset ID.
+        /// </summary>
+        public long ID;
+
+        /// <summary>
+        /// The xasset Name.
+        /// </summary>
+        public long Name;
+
+        /// <summary>
+        /// Whether or not this asset is a tempt slot.
+        /// </summary>
+        public int Temp;
+
+        /// <summary>
+        /// Header Memory.
+        /// </summary>
+        public long HeaderMemory;
+
+        /// <summary>
+        /// The fast file that owns this asset.
+        /// </summary>
+        public long Owner;
+
+        /// <summary>
+        /// The previous xasset in the list.
+        /// </summary>
+        public long Previous;
+
+        /// <summary>
+        /// The next xasset in the list.
+        /// </summary>
+        public long Next;
+
+        /// <summary>
+        /// First child asset we have overriden.
+        /// </summary>
+        public long FirstChild;
+
+        /// <summary>
+        /// Last child asset we have overriden.
+        /// </summary>
+        public long LastChild;
+
+        /// <summary>
+        /// The asset header.
+        /// </summary>
+        public long Header;
+        /// <summary>
+        /// The size of the extended data.
+        /// </summary>
+        public long ExtendedDataSize;
+
+        /// <summary>
+        /// The extended data, if any.
+        /// </summary>
+        public long ExtendedData;
+
+        /// <summary>
+        /// The pointer that points to the extended data.
+        /// </summary>
+        public long ExtendedDataPtrOffset;
+    };
+
+    /// <summary>
+    /// Parasytes XAsset Pool Structure.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ParasyteXAssetPool64
+    {
+        /// <summary>
+        /// The start of the asset chain.
+        /// </summary>
+        public long FirstXAsset;
+
+        /// <summary>
+        /// The end of the asset chain.
+        /// </summary>
+        public long LastXAsset;
+
+        /// <summary>
+        /// The asset hash table for this pool.
+        /// </summary>
+        public long LookupTable;
+
+        /// <summary>
+        /// Storage for asset headers for this pool.
+        /// </summary>
+        public long HeaderMemory;
+    };
 }
