@@ -51,6 +51,8 @@ namespace Husky
     /// </summary>
     public class WavefrontOBJ
     {
+
+        public string Name { get; set; }
         /// <summary>
         /// OBJ Material Class
         /// </summary>
@@ -189,19 +191,19 @@ namespace Husky
         /// Active OBJ File Line Number
         /// </summary>
         private long ActiveLine { get; set; }
-
+        
         /// <summary>
         /// Initializes OBJ 
         /// </summary>
-        public WavefrontOBJ() { }
-
-        /// <summary>
-        /// Initializes OBJ and loads an OBJ file
-        /// </summary>
-        /// <param name="fileName">File path</param>
-        public WavefrontOBJ(string fileName)
+        public WavefrontOBJ()
         {
-            Load(fileName);
+            // Default
+        }
+
+        
+        public WavefrontOBJ(string name)
+        {
+            Name = name;
         }
 
         /// <summary>

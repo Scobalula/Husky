@@ -26,9 +26,9 @@ using System.Collections.Generic;
 namespace Husky
 {
     /// <summary>
-    /// Modern Warfare 2019 Logic
+    /// Vanguard Logic
     /// </summary>
-    public class ModernWarfare4
+    public class Vanguard
     {
         private static Dictionary<int, GfxMapTRZoneData> Zones { get; } = new Dictionary<int, GfxMapTRZoneData>();
         public class GfxMapTRZoneData : IDisposable
@@ -37,12 +37,8 @@ namespace Husky
             /// <summary>
             /// Gets or Sets the Position Buffer Reader
             /// </summary>
-            public BinaryReader PositionBufferReader { get; set; }
+            public BinaryReader VertexBufferReader { get; set; }
 
-            /// <summary>
-            /// Gets or Sets the Draw Data Buffer Reader
-            /// </summary>
-            public BinaryReader DrawDataBufferReader { get; set; }
 
             /// <summary>
             /// Gets or Sets the Face Indices Buffer Reader
@@ -57,11 +53,10 @@ namespace Husky
             /// <summary>
             /// Creates a new TR Zone Info Object
             /// </summary>
-            public GfxMapTRZoneData(string name, byte[] posBuffer, byte[] drawDataBuffer, byte[] faceIndicesBuffer)
+            public GfxMapTRZoneData(string name, byte[] posBuffer, byte[] faceIndicesBuffer)
             {
                 Name = name;
-                PositionBufferReader = new BinaryReader(new MemoryStream(posBuffer));
-                DrawDataBufferReader = new BinaryReader(new MemoryStream(drawDataBuffer));
+                VertexBufferReader = new BinaryReader(new MemoryStream(posBuffer));
                 FaceIndicesBufferReader = new BinaryReader(new MemoryStream(faceIndicesBuffer));
             }
 
@@ -70,8 +65,7 @@ namespace Husky
             /// </summary>
             public void Dispose()
             {
-                PositionBufferReader?.Dispose();
-                DrawDataBufferReader?.Dispose();
+                VertexBufferReader?.Dispose();
                 FaceIndicesBufferReader?.Dispose();
             }
         }
@@ -83,13 +77,13 @@ namespace Husky
         {
 
             // Found her
-            printCallback?.Invoke("Found supported game: Call of Duty: Modern Warfare 2019 (Parasyte)");
+            printCallback?.Invoke("Found supported game: Call of Duty: Vanguard (Parasyte)");
 
             // Get GfxMap & TRZone pools
-            var gfxMapPool = reader.ReadStruct<ParasyteXAssetPool64>(assetPoolsAddress + Marshal.SizeOf<ParasyteXAssetPool64>() * 31).FirstXAsset;
-            var trZonePool = reader.ReadStruct<ParasyteXAssetPool64>(assetPoolsAddress + Marshal.SizeOf<ParasyteXAssetPool64>() * 32).FirstXAsset;
+            var gfxMapPool = reader.ReadStruct<ParasyteXAssetPool64>(assetPoolsAddress + Marshal.SizeOf<ParasyteXAssetPool64>() * 33).FirstXAsset;
+            var trZonePool = reader.ReadStruct<ParasyteXAssetPool64>(assetPoolsAddress + Marshal.SizeOf<ParasyteXAssetPool64>() * 34).FirstXAsset;
 
-            MW4GfxMap gfxMapAsset = reader.ReadStruct<MW4GfxMap>(gfxMapPool);
+            VGGfxMap gfxMapAsset = reader.ReadStruct<VGGfxMap>(gfxMapPool);
             // Iterate over loaded Gfx Map assets and grab the last one
             for (var current = reader.ReadStruct<ParasyteXAsset64>(gfxMapPool); ; current = reader.ReadStruct<ParasyteXAsset64>(current.Next))
             {
@@ -99,7 +93,7 @@ namespace Husky
                 if (!String.IsNullOrEmpty(assetName) && current.Next == 0)
                 {
                     // Assign it
-                    gfxMapAsset = reader.ReadStruct<MW4GfxMap>(current.Header);
+                    gfxMapAsset = reader.ReadStruct<VGGfxMap>(current.Header);
                     break;
                 }
                 // Last one
@@ -110,29 +104,20 @@ namespace Husky
             // Name
             string gfxMapName = reader.ReadNullTerminatedString(gfxMapAsset.NamePointer);
             string mapName = reader.ReadNullTerminatedString(gfxMapAsset.MapNamePointer);
-            // Warzone vertex count exceeds .NET Array limit. Skip for now
-            if (mapName == "mp_wz_island")
-            {
-                printCallback?.Invoke("Warzone map is not supported yet");
-                return;
-            }
-
-            if (!String.IsNullOrEmpty(mapName))
+            if (!String.IsNullOrEmpty(gfxMapName))
             {
                 // Grab all loaded TR Zones
                 for (var current = reader.ReadStruct<ParasyteXAsset64>(trZonePool); ; current = reader.ReadStruct<ParasyteXAsset64>(current.Next))
                 {
                     // Read TR Zone
-                    var zone = reader.ReadStruct<MW4GfxWorldTRZone>(current.Header);
+                    var zone = reader.ReadStruct<VGGfxWorldTRZone>(current.Header);
                     // Check if it has vertex data
-                    if (zone.PositionsBufferPointer != 0)
+                    if (zone.VertexBufferPointer > 0 && !Zones.ContainsKey(zone.Index))
                     {
-                        // Add it
                         Zones[zone.Index] = new GfxMapTRZoneData(
                             reader.ReadNullTerminatedString(zone.NamePointer),
-                            reader.ReadBytes(zone.PositionsBufferPointer, zone.PositionsBufferSize),
-                            reader.ReadBytes(zone.DrawDataBufferPointer, zone.DrawDataBufferSize),
-                            reader.ReadBytes(zone.FaceIndicesBufferPointer, zone.FaceIndicesBufferSize * 2));
+                            reader.ReadBytes(zone.VertexBufferPointer, zone.VertexBufferSize),
+                            reader.ReadBytes(zone.IndicesBufferPointer, zone.IndexCount * 2));
                     }
                     // Last one
                     if (current.Next == 0)
@@ -143,25 +128,25 @@ namespace Husky
                 var mapFile = new IWMap();
                 // Print Info
                 printCallback?.Invoke("");
-                printCallback?.Invoke($"Loaded GfxMap           {gfxMapName}");
                 printCallback?.Invoke($"Loaded Map              {mapName}");
-                printCallback?.Invoke($"Loaded Surfaces         {gfxMapAsset.SurfaceCount}");
-                printCallback?.Invoke($"Loaded Surfaces Data    {gfxMapAsset.SurfaceDataCount}");
+                printCallback?.Invoke($"Loaded Surfaces         {gfxMapAsset.surfaceCount}");
+                printCallback?.Invoke($"Loaded Surfaces Data    {gfxMapAsset.surfaceDataCount}");
                 printCallback?.Invoke($"Loaded TR Zones         {Zones.Count}");
                 printCallback?.Invoke($"Loaded Unique Models    {gfxMapAsset.UniqueModelCount}");
                 printCallback?.Invoke($"Loaded Static Models    {gfxMapAsset.ModelInstCount}");
 
                 // Build output Folder
-                string outputName = Path.Combine("exported_maps", "modern_warfare_4", gameType, mapName, mapName);
+                string outputName = Path.Combine("exported_maps", "vanguard", gameType, mapName, mapName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputName));
 
                 // Stop watch
                 var stopWatch = Stopwatch.StartNew();
 
-                // Read Surfaces
+                // Read surface data
                 printCallback?.Invoke("Parsing surface data....");
-                var data = reader.ReadStructArray<MW4GfxSurfaceData>(gfxMapAsset.SurfaceDataPointer, gfxMapAsset.SurfaceDataCount);
-                var surfaces = ReadGfxSufaces(reader, gfxMapAsset.SurfacesPointer, gfxMapAsset.SurfaceCount);
+                var surfaces = reader.ReadStructArray<VGGfxMapSurface>(gfxMapAsset.surfacesPtr, gfxMapAsset.surfaceCount);
+                var surfaceData = reader.ReadStructArray<VGGfxSurfaceData>(gfxMapAsset.surfaceDataPtr, gfxMapAsset.surfaceDataCount);
+                var surfaceMaterials = reader.ReadStructArray<long>(gfxMapAsset.materialsPtr, gfxMapAsset.materialCount);
                 printCallback?.Invoke(String.Format("Parsed surface data in {0:0.00} seconds.", stopWatch.ElapsedMilliseconds / 1000.0));
 
                 // Reset timer
@@ -181,11 +166,11 @@ namespace Husky
                 List<int> missingZones = new List<int>();
                 foreach (var surf in surfaces)
                 {
-                    var dataInfo = data[surf.DataIndex];
-                    if (Zones.TryGetValue(dataInfo.TransientZone, out var TRZone))
+                    var dataInfo = surfaceData[surf.DataIndex];
+                    if (Zones.TryGetValue(dataInfo.ZoneIndex, out var TRZone))
                     {
                         // Read material
-                        var material = ReadMaterial(reader, surf.MaterialPointer);
+                        var material = ReadMaterial(reader, surfaceMaterials[surf.MaterialIndex]);
                         // Merge object with same base material
                         if (dataInfo.LayerCount > 1)
                             material.Name = material.Name.Split('_')[0];
@@ -195,28 +180,28 @@ namespace Husky
                         obj.AddMaterial(material);
 
                         // Load Vertex Positions
-                        TRZone.PositionBufferReader.BaseStream.Position = dataInfo.PositionsPosition;
+                        TRZone.VertexBufferReader.BaseStream.Position = dataInfo.VertexOffsets[1];
                         for (int i = 0; i < surf.VertexCount; i++)
-                            obj.Vertices.Add(TRZone.PositionBufferReader.ReadStruct<GfxVertexPosition>().ToCentimeter());
+                            obj.Vertices.Add(Vertex.UnpackVGVertex(TRZone.VertexBufferReader.ReadUInt64(), dataInfo.Scale, dataInfo.Offsets));
 
                         // Load Vertex Normals
-                        TRZone.DrawDataBufferReader.BaseStream.Position = dataInfo.NormalQuatPosition;
+                        TRZone.VertexBufferReader.BaseStream.Position = dataInfo.VertexOffsets[2];
                         for (int i = 0; i < surf.VertexCount; i++)
                         {
-                            var PackedTangentFrame = TRZone.DrawDataBufferReader.ReadUInt32();
+                            var PackedTangentFrame = TRZone.VertexBufferReader.ReadUInt32();
                             var (tangent, bitangent, normal) = VertexNormalUnpacking.UnpackTangentFrame(PackedTangentFrame);
                             obj.Normals.Add(normal);
                         }
 
                         // Load vertex UVs
-                        TRZone.DrawDataBufferReader.BaseStream.Position = dataInfo.UVsPosition;
+                        TRZone.VertexBufferReader.BaseStream.Position = dataInfo.VertexOffsets[5];
                         for (int i = 0; i < surf.VertexCount; i++)
                         {
-                            var UV = TRZone.DrawDataBufferReader.ReadStruct<GfxVertexUV>();
+                            var UV = TRZone.VertexBufferReader.ReadStruct<GfxVertexUV>();
                             obj.UVs.Add(new Vector2(UV.U, 1 - UV.V));
                             // Skip layer UVs
                             int LayerUVPadding = (dataInfo.LayerCount - 1) * 8;
-                            TRZone.DrawDataBufferReader.BaseStream.Position += LayerUVPadding;
+                            TRZone.VertexBufferReader.BaseStream.Position += LayerUVPadding;
                         }
 
 
@@ -244,16 +229,16 @@ namespace Husky
                         // Update vertex offset
                         vertexOffset += surf.VertexCount;
                     }
+
                     else
                     {
-                        if (!missingZones.Contains(dataInfo.TransientZone))
+                        if (!missingZones.Contains(dataInfo.ZoneIndex))
                         {
-                            printCallback?.Invoke($"Zone {dataInfo.TransientZone} not loaded");
-                            missingZones.Add(dataInfo.TransientZone);
+                            printCallback?.Invoke($"Zone {dataInfo.ZoneIndex} not loaded");
+                            missingZones.Add(dataInfo.ZoneIndex);
                         }
                     }
-                    
-                    
+
                 }
 
                 // Save it
@@ -277,14 +262,13 @@ namespace Husky
 
                 printCallback?.Invoke("Parsing static models....");
                 // Read entities
-                var mapEntities = ReadStaticModels(
-                    reader,
-                    gfxMapAsset.ModelInstPtr,
-                    gfxMapAsset.ModelInstCount,
-                    gfxMapAsset.UniqueModelsPtr,
-                    gfxMapAsset.UniqueModelCount,
-                    gfxMapAsset.ModelInstDataPtr,
-                    gfxMapAsset.ModelInstDataCount);
+                var mapEntities = ModernWarfare4.ReadStaticModels(reader,
+                                                                  gfxMapAsset.ModelInstPtr,
+                                                                  gfxMapAsset.ModelInstCount,
+                                                                  gfxMapAsset.UniqueModelsPtr,
+                                                                  gfxMapAsset.UniqueModelCount,
+                                                                  gfxMapAsset.ModelInstDataPtr,
+                                                                  gfxMapAsset.ModelInstDataCount);
 
                 // Add them to IWMap
                 mapFile.Entities.AddRange(mapEntities);
@@ -299,33 +283,17 @@ namespace Husky
                 printCallback?.Invoke("No map was loaded.");
             }
         }
-
-        /// <summary>
-        /// Reads Gfx Surfaces
-        /// </summary>
-        public static MW4GfxMapSurface[] ReadGfxSufaces(ProcessReader reader, long address, int count)
-        {
-            // Preallocate array
-            MW4GfxMapSurface[] surfaces = new MW4GfxMapSurface[count];
-
-            // Loop number of indices we have
-            for (int i = 0; i < count; i++)
-                // Add it
-                surfaces[i] = reader.ReadStruct<MW4GfxMapSurface>(address + i * Marshal.SizeOf<MW4GfxMapSurface>());
-
-            // Done
-            return surfaces;
-        }
-
         /// <summary>
         /// Reads a material for the given surface and its associated images
         /// </summary>
         public static WavefrontOBJ.Material ReadMaterial(ProcessReader reader, long address)
         {
             // Read Material
-            var material = reader.ReadStruct<MW4Material>(address);
+            var material = reader.ReadStruct<VGMaterial>(address);
             // Name
             string materialName = reader.ReadNullTerminatedString(material.NamePointer);
+            if (materialName.Contains("248n_448n"))
+                Console.WriteLine();
             // Create new OBJ Image
             var objMaterial = new WavefrontOBJ.Material(Path.GetFileNameWithoutExtension(materialName).Replace("*", ""));
             // Loop over images
@@ -343,79 +311,5 @@ namespace Husky
             return objMaterial;
         }
 
-        /// <summary>
-        /// Parses Static Models into IWMap.Entity List
-        /// </summary>
-        /// <param name="reader">Process Memory Reader</param>
-        /// <param name="instancesAddress">Model Instances Address</param>
-        /// <param name="instancesCount">Model Instances Count</param>
-        /// <param name="modelsAddress">Unique Models Address</param>
-        /// <param name="modelCount">Unique Models Count</param>
-        /// <param name="modelIndicesAddress">Model Indices Address</param>
-        /// <param name="modelIndicesCount">Model Indices Count</param>
-        /// <returns>List of IWMap Entities</returns>
-        public unsafe static List<IWMap.Entity> ReadStaticModels(
-            ProcessReader reader,
-            long instancesAddress,
-            int instancesCount,
-            long modelsAddress,
-            int modelCount,
-            long instancesDataAddress,
-            int instancesDataCount)
-        {
-            // Resulting Entities
-            List<IWMap.Entity> entities = new List<IWMap.Entity>(instancesCount);
-            // Read instances buffer
-            var byteBuffer = reader.ReadBytes(instancesAddress, instancesCount * Marshal.SizeOf<MW4GfxStaticModelPlacement>());
-            // Loop number of models we have
-            for (int i = 0; i < instancesCount; i++)
-            {
-                // Read Struct
-                var staticModel = ByteUtil.BytesToStruct<MW4GfxStaticModelPlacement>(byteBuffer, i * Marshal.SizeOf<MW4GfxStaticModelPlacement>());
-                // Placeholder Name 
-                var modelName = $"model_{i}";
-                // Convert PackedQuat Rotation to Euler
-                var euler = new Vector4(
-                    (staticModel.PackedQuat[2] * 0.000015259022f * 2.0f) - 1.0f,
-                    (staticModel.PackedQuat[0] * 0.000015259022f * 2.0f) - 1.0f,
-                    (staticModel.PackedQuat[1] * 0.000015259022f * 2.0f) - 1.0f,
-                    (staticModel.PackedQuat[3] * 0.000015259022f * 2.0f) - 1.0f).ToEuler();
-
-                // Add it
-                entities.Add(IWMap.Entity.CreateMiscModel(
-                                modelName,
-                                new Vector3(staticModel.PackedPosition[0] * 0.000244140625f,
-                                            staticModel.PackedPosition[1] * 0.000244140625f,
-                                            staticModel.PackedPosition[2] * 0.000244140625f),
-                                Rotation.ToDegrees(euler),
-                                staticModel.Scale));
-            }
-            // Array to store unique model names
-            string[] modelNames = new string[modelCount];
-            // Read unique models buffer
-            byteBuffer = reader.ReadBytes(modelsAddress, modelCount * Marshal.SizeOf<MW4GfxStaticModel>());
-            for (int i = 0; i < modelCount; i++)
-            {
-                var xmodel = ByteUtil.BytesToStruct<MW4GfxStaticModel>(byteBuffer, i * Marshal.SizeOf<MW4GfxStaticModel>());
-                modelNames[i] = Path.GetFileNameWithoutExtension(reader.ReadNullTerminatedString(reader.ReadInt64(xmodel.XModelPointer)));
-            }
-
-            // Assign the correct name to each IWMap entity
-            foreach (var modelData in reader.ReadStructArray<MW4ModelInstData>(instancesDataAddress, instancesDataCount))
-            {
-                // Get model name
-                string modelName = modelNames[modelData.uniqueModelIndex];
-                // Iterate over instances of this model
-                for (int i = modelData.firstInstance; i < modelData.firstInstance + modelData.instanceCount; i++)
-                {
-                    // Get IWMap entity
-                    var modelInst = entities[i];
-                    // Assign name
-                    modelInst.KeyValuePairs["model"] = modelName;
-                }
-            }
-            // Done
-            return entities;
-        }
     }
 }

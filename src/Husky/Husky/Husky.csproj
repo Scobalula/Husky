@@ -63,11 +63,13 @@
     <Compile Include="FileFormats\IWMap.cs" />
     <Compile Include="FileFormats\WavefrontOBJ.cs" />
     <Compile Include="GameStructures\GameDefinition.cs" />
+    <Compile Include="GameStructures\Vanguard_Offsets.cs" />
     <Compile Include="GameStructures\ModernWarfare4_Offsets.cs" />
     <Compile Include="GameStructures\Shared.cs" />
     <Compile Include="Games\BlackOps2.cs" />
     <Compile Include="Games\BlackOps3.cs" />
     <Compile Include="Games\Ghosts.cs" />
+    <Compile Include="Games\Vanguard.cs" />
     <Compile Include="Games\ModernWarfare4.cs" />
     <Compile Include="Games\WorldWarII.cs" />
     <Compile Include="Games\ModernWarfare3.cs" />

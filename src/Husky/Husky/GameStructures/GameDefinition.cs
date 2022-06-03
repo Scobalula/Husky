@@ -52,6 +52,10 @@ namespace Husky
                         ExportMethod = ModernWarfare4.ExportBSPData;
                         break;
 
+                    case 0x44524155474e4156:
+                        ExportMethod = Vanguard.ExportBSPData;
+                        break;
+
                     default:
                         printCallback?.Invoke("Parasyte game handler found but is not supported.");
                         return;
