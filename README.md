@@ -6,7 +6,6 @@ Husky is a BSP Extractor for Call of Duty. It can rip the raw vertex/face data t
 * Call of Duty: Modern Warfare
 * Call of Duty: Modern Warfare 2
 * Call of Duty: Modern Warfare 3
-* Call of Duty: Modern Warfare 2019 (Parasyte)
 * Call of Duty: Ghosts
 * Call of Duty: Infinite Warfare
 * Call of Duty: World at War
@@ -14,8 +13,10 @@ Husky is a BSP Extractor for Call of Duty. It can rip the raw vertex/face data t
 * Call of Duty: Black Ops 2
 * Call of Duty: Black Ops 3
 * Call of Duty: Advanced Warfare
-* Call of DUty: World War 2
+* Call of Duty: World War 2
 * Call of Duty: Modern Warfare Remastered
+* Call of Duty: Modern Warfare 2019 (Parasyte)
+* Call of Duty: Vanguard (Parasyte)
 
 ### Downloading/Using Husky
 
