@@ -63,15 +63,13 @@ Also I've noticed several people asking how to import it into Unity/Unreal, ther
 
 * A: It appears in all games, script brushmodels are at the origin, and I assume the map_ents assets or some other data is used to tell the game where to move them to on load. This will remain as is.
 
+# Discord
+
+❤️ Join my Discord to receive community help or show off your stuff ❤️
+
+[![Join my Discord](https://discordapp.com/api/guilds/719503756810649640/widget.png?style=banner2)](https://discord.gg/RyqyThu)
+
 ## Credits
 
 * DTZxPorter - Normal Unpacking Code from Wraith, Half Floats code, Other misc info from Wraith.
 * Anna Baker - [Icon](https://thenounproject.com/term/husky/1121992/) ([https://thenounproject.com/anna.baker194/](https://thenounproject.com/anna.baker194/))
-
-## Support Me
-
-If you use Husky in any of your projects, it would be appreciated if you provide credit for its use, a lot of time and work went into developing it and a simple credit isn't too much to ask for.
-
-If you'd like to support me even more, consider donating, I develop a lot of apps including Husky and majority are available free of charge with source code included:
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-yellowgreen.svg)](https://www.paypal.me/scobalula)
