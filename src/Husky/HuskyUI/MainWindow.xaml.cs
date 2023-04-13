@@ -21,6 +21,7 @@ using System.Threading;
 using System.Windows.Shell;
 using Husky;
 using System.Reflection;
+using System.Globalization;
 
 namespace HuskyUI
 {
@@ -45,6 +46,9 @@ namespace HuskyUI
             // Initial Print
             PrintLine("Load a supported CoD Game, then click the paper plane to export loaded BSP data.");
             PrintLine("");
+
+            // Reset culture for OBJs.
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
         }
 
         private void ExportClick(object sender, RoutedEventArgs e)
