@@ -492,7 +492,7 @@ namespace Husky
             }
             else
             {
-                printCallback?.Invoke("Call of Duty: Advanced Warfare is supported, but this EXE is not.");
+                printCallback?.Invoke("Call of Duty: Black Ops 3 is supported, but this EXE is not.");
             }
         }
 
